@@ -1,9 +1,7 @@
 package com.github.itora.account.internal;
 
-import java.time.Instant;
 import java.util.Map;
 
-import org.assertj.core.internal.cglib.core.Block;
 import org.assertj.core.util.Maps;
 
 import com.github.itora.account.Account;
@@ -19,6 +17,7 @@ import com.github.itora.tx.OpenTx;
 import com.github.itora.tx.ReceiveTx;
 import com.github.itora.tx.SendTx;
 import com.github.itora.tx.Tx;
+import com.github.itora.tx.TxIds;
 
 public final class AccountManagerImpl implements AccountManager {
 
@@ -54,24 +53,29 @@ public final class AccountManagerImpl implements AccountManager {
     public void accept(Event event) {
     	// Check the event validity
     	Event.visit(event, new Event.Visitor<Void>() {
-    		private void add(Account account, Amount amount, Instant timestamp) {
+    		private void add(Account account, Tx tx) {
     	    	PersonalChain personalChain = personalChains.get(account);
-    	    	Tx tx = Tx.Factory.receiveTx(new TxId(), amount, timestamp);
     	    	personalChains.put(account, new PersonalChain(personalChain, tx));
     		}
     		@Override
     		public Void visitOpenEvent(OpenEvent event) {
+    			Account account = event.account();
+    	    	Tx tx = Tx.Factory.openTx(event.timestamp(), TxIds.txId(event));
+    			add(account, tx);
     			return null;
     		}
     		@Override
     		public Void visitReceiveEvent(ReceiveEvent event) {
-    			Account account;
-    			add(account, event.amount(), event.timestamp());
+    			Account account = null; // TODO
+    	    	Tx tx = Tx.Factory.receiveTx(TxIds.txId(event), event.amount(), event.timestamp());
+    			add(account, tx);
     	    	return null;
     		}
     		@Override
     		public Void visitSendEvent(SendEvent event) {
-    			//TODO
+    			Account account = event.from();
+    	    	Tx tx = Tx.Factory.sendTx(TxIds.txId(event), event.to(), event.amount(), event.timestamp());
+    			add(account, tx);
     			return null;
     		}
 		});
