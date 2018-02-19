@@ -6,6 +6,7 @@ import org.assertj.core.util.Lists;
 
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
+import com.github.itora.account.Amount;
 import com.github.itora.account.Event;
 import com.github.itora.account.PersonalChainBlock;
 
@@ -13,8 +14,15 @@ public final class AccountManagerImpl implements AccountManager {
 
 	private final List<PersonalChainBlock> personalChain = Lists.newArrayList();
 	
-    public long balance(Account account) {
-        return 0;
+	public AccountManagerImpl() {
+	}
+	
+    public Amount balance(Account account) {
+    	long sum = 0L;
+    	for (PersonalChainBlock b : personalChain) {
+    		sum += b.amount.delta;
+    	}
+        return new Amount(sum);
     }
 
     @Override
