@@ -29,7 +29,6 @@ type SendEvent {
 type ReceiveEvent {
     val previous: TxId
     val source: TxId
-    val amount: Amount
     val pow: long
     val timestamp: Instant
     val signature: long

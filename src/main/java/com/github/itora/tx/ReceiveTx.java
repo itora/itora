@@ -1,7 +1,8 @@
 package com.github.itora.tx;
 
-import com.github.itora.amount.Amount;
 import java.time.Instant;
+
+import com.github.itora.amount.Amount;
 
 public final class ReceiveTx extends Tx {
 

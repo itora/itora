@@ -21,8 +21,8 @@ public abstract class Event {
             return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
         }
 
-        public static ReceiveEvent receiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
-            return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        public static ReceiveEvent receiveEvent(TxId previous, TxId source, long pow, Instant timestamp, long signature) {
+            return new ReceiveEvent(previous, source, pow, timestamp, signature);
         }
     }
 

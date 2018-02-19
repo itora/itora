@@ -1,8 +1,9 @@
 package com.github.itora.tx;
 
+import java.time.Instant;
+
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
-import java.time.Instant;
 
 public final class SendTx extends Tx {
 

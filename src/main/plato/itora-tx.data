@@ -12,8 +12,8 @@ type Tx = OpenTx | SendTx | ReceiveTx
 
 
 type OpenTx {
-    val timestamp: Instant
     val txId: TxId
+    val timestamp: Instant
 }
 
 type SendTx {

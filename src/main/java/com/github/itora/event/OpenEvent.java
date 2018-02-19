@@ -1,7 +1,8 @@
 package com.github.itora.event;
 
-import com.github.itora.account.Account;
 import java.time.Instant;
+
+import com.github.itora.account.Account;
 
 public final class OpenEvent extends Event {
 

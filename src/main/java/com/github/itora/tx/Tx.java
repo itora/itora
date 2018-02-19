@@ -12,8 +12,8 @@ public abstract class Tx {
 
     public interface Factory {
 
-        public static OpenTx openTx(Instant timestamp, TxId txId) {
-            return new OpenTx(timestamp, txId);
+        public static OpenTx openTx(TxId txId, Instant timestamp) {
+            return new OpenTx(txId, timestamp);
         }
 
         public static SendTx sendTx(TxId txId, Account to, Amount amount, Instant timestamp) {
@@ -31,13 +31,13 @@ public abstract class Tx {
 
     abstract <R> R visit(Tx.Visitor<R> visitor);
 
-    public abstract Instant timestamp();
-
-    public abstract Tx withTimestamp(Instant timestamp);
-
     public abstract TxId txId();
 
     public abstract Tx withTxId(TxId txId);
+
+    public abstract Instant timestamp();
+
+    public abstract Tx withTimestamp(Instant timestamp);
 
     @Override
     public abstract boolean equals(Object o);

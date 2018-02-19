@@ -4,19 +4,19 @@ import java.time.Instant;
 
 public final class OpenTx extends Tx {
 
-    public final Instant timestamp;
-
     public final TxId txId;
 
-    public OpenTx(Instant timestamp, TxId txId) {
-        this.timestamp = timestamp;
+    public final Instant timestamp;
+
+    public OpenTx(TxId txId, Instant timestamp) {
         this.txId = txId;
+        this.timestamp = timestamp;
     }
 
     public interface Factory {
 
-        public static OpenTx openTx(Instant timestamp, TxId txId) {
-            return new OpenTx(timestamp, txId);
+        public static OpenTx openTx(TxId txId, Instant timestamp) {
+            return new OpenTx(txId, timestamp);
         }
     }
 
@@ -26,23 +26,23 @@ public final class OpenTx extends Tx {
     }
 
     @Override
-    public final Instant timestamp() {
-        return timestamp;
-    }
-
-    @Override
-    public final OpenTx withTimestamp(Instant timestamp) {
-        return new OpenTx(timestamp, txId);
-    }
-
-    @Override
     public final TxId txId() {
         return txId;
     }
 
     @Override
     public final OpenTx withTxId(TxId txId) {
-        return new OpenTx(timestamp, txId);
+        return new OpenTx(txId, timestamp);
+    }
+
+    @Override
+    public final Instant timestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public final OpenTx withTimestamp(Instant timestamp) {
+        return new OpenTx(txId, timestamp);
     }
 
     public static Builder builder() {
@@ -50,7 +50,7 @@ public final class OpenTx extends Tx {
     }
 
     public final Builder toBuilder() {
-        return OpenTx.builder().timestamp(timestamp).txId(txId);
+        return OpenTx.builder().txId(txId).timestamp(timestamp);
     }
 
     @Override
@@ -65,33 +65,24 @@ public final class OpenTx extends Tx {
             return false;
         }
         OpenTx that = (OpenTx) o;
-        return java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.txId, that.txId);
+        return java.util.Objects.equals(this.txId, that.txId) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(timestamp, txId);
+        return java.util.Objects.hash(txId, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "OpenTx{timestamp = " + this.timestamp + ", txId = " + this.txId + "}";
+        return "OpenTx{txId = " + this.txId + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
 
-        public Instant timestamp;
-
         public TxId txId;
 
-        public final Instant timestamp() {
-            return timestamp;
-        }
-
-        public final Builder timestamp(Instant timestamp) {
-            this.timestamp = timestamp;
-            return this;
-        }
+        public Instant timestamp;
 
         public final TxId txId() {
             return txId;
@@ -102,8 +93,17 @@ public final class OpenTx extends Tx {
             return this;
         }
 
+        public final Instant timestamp() {
+            return timestamp;
+        }
+
+        public final Builder timestamp(Instant timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
         public final OpenTx build() {
-            return new OpenTx(timestamp, txId);
+            return new OpenTx(txId, timestamp);
         }
 
         @Override
@@ -118,17 +118,17 @@ public final class OpenTx extends Tx {
                 return false;
             }
             OpenTx.Builder that = (OpenTx.Builder) o;
-            return java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.txId, that.txId);
+            return java.util.Objects.equals(this.txId, that.txId) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(timestamp, txId);
+            return java.util.Objects.hash(txId, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "OpenTx.Builder{timestamp = " + this.timestamp + ", txId = " + this.txId + "}";
+            return "OpenTx.Builder{txId = " + this.txId + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

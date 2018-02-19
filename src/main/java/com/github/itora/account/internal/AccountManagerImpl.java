@@ -2,8 +2,6 @@ package com.github.itora.account.internal;
 
 import java.util.Map;
 
-import org.assertj.core.util.Maps;
-
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
 import com.github.itora.account.PersonalChain;
@@ -18,6 +16,8 @@ import com.github.itora.tx.ReceiveTx;
 import com.github.itora.tx.SendTx;
 import com.github.itora.tx.Tx;
 import com.github.itora.tx.TxIds;
+import com.google.common.collect.Maps;
+
 
 public final class AccountManagerImpl implements AccountManager {
 

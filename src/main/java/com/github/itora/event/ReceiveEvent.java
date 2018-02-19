@@ -1,7 +1,7 @@
 package com.github.itora.event;
 
-import com.github.itora.amount.Amount;
 import java.time.Instant;
+
 import com.github.itora.tx.TxId;
 
 public final class ReceiveEvent extends Event {
@@ -10,18 +10,15 @@ public final class ReceiveEvent extends Event {
 
     public final TxId source;
 
-    public final Amount amount;
-
     public final long pow;
 
     public final Instant timestamp;
 
     public final long signature;
 
-    public ReceiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
+    public ReceiveEvent(TxId previous, TxId source, long pow, Instant timestamp, long signature) {
         this.previous = previous;
         this.source = source;
-        this.amount = amount;
         this.pow = pow;
         this.timestamp = timestamp;
         this.signature = signature;
@@ -29,8 +26,8 @@ public final class ReceiveEvent extends Event {
 
     public interface Factory {
 
-        public static ReceiveEvent receiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
-            return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        public static ReceiveEvent receiveEvent(TxId previous, TxId source, long pow, Instant timestamp, long signature) {
+            return new ReceiveEvent(previous, source, pow, timestamp, signature);
         }
     }
 
@@ -44,7 +41,7 @@ public final class ReceiveEvent extends Event {
     }
 
     public final ReceiveEvent withPrevious(TxId previous) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
     public final TxId source() {
@@ -52,15 +49,7 @@ public final class ReceiveEvent extends Event {
     }
 
     public final ReceiveEvent withSource(TxId source) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
-    }
-
-    public final Amount amount() {
-        return amount;
-    }
-
-    public final ReceiveEvent withAmount(Amount amount) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
     @Override
@@ -70,7 +59,7 @@ public final class ReceiveEvent extends Event {
 
     @Override
     public final ReceiveEvent withPow(long pow) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
     @Override
@@ -80,7 +69,7 @@ public final class ReceiveEvent extends Event {
 
     @Override
     public final ReceiveEvent withTimestamp(Instant timestamp) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
     @Override
@@ -90,7 +79,7 @@ public final class ReceiveEvent extends Event {
 
     @Override
     public final ReceiveEvent withSignature(long signature) {
-        return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+        return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
     public static Builder builder() {
@@ -98,7 +87,7 @@ public final class ReceiveEvent extends Event {
     }
 
     public final Builder toBuilder() {
-        return ReceiveEvent.builder().previous(previous).source(source).amount(amount).pow(pow).timestamp(timestamp).signature(signature);
+        return ReceiveEvent.builder().previous(previous).source(source).pow(pow).timestamp(timestamp).signature(signature);
     }
 
     @Override
@@ -113,17 +102,17 @@ public final class ReceiveEvent extends Event {
             return false;
         }
         ReceiveEvent that = (ReceiveEvent) o;
-        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(previous, source, amount, pow, timestamp, signature);
+        return java.util.Objects.hash(previous, source, pow, timestamp, signature);
     }
 
     @Override
     public final String toString() {
-        return "ReceiveEvent{previous = " + this.previous + ", source = " + this.source + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+        return "ReceiveEvent{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
     }
 
     public static final class Builder {
@@ -131,8 +120,6 @@ public final class ReceiveEvent extends Event {
         public TxId previous;
 
         public TxId source;
-
-        public Amount amount;
 
         public long pow;
 
@@ -155,15 +142,6 @@ public final class ReceiveEvent extends Event {
 
         public final Builder source(TxId source) {
             this.source = source;
-            return this;
-        }
-
-        public final Amount amount() {
-            return amount;
-        }
-
-        public final Builder amount(Amount amount) {
-            this.amount = amount;
             return this;
         }
 
@@ -195,7 +173,7 @@ public final class ReceiveEvent extends Event {
         }
 
         public final ReceiveEvent build() {
-            return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
+            return new ReceiveEvent(previous, source, pow, timestamp, signature);
         }
 
         @Override
@@ -210,17 +188,17 @@ public final class ReceiveEvent extends Event {
                 return false;
             }
             ReceiveEvent.Builder that = (ReceiveEvent.Builder) o;
-            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(previous, source, amount, pow, timestamp, signature);
+            return java.util.Objects.hash(previous, source, pow, timestamp, signature);
         }
 
         @Override
         public final String toString() {
-            return "ReceiveEvent.Builder{previous = " + this.previous + ", source = " + this.source + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+            return "ReceiveEvent.Builder{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
         }
     }
 }
