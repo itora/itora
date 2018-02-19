@@ -42,23 +42,23 @@ public class AccountManagerImplTest {
 
         accountManager.accept(sendENtoS, receiveSfromEN);
 
-        Assertions.assertThat(accountManager.balance(accountS).value).isEqualTo(Amount.Factory.amount(30_000L));
+        Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
         SendEvent sendStoD = Event.Factory.sendEvent(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L), 0L,
                 Instant.EPOCH.plusSeconds(400_000L), 0L);
 
         accountManager.accept(sendStoD);
 
-        Assertions.assertThat(accountManager.balance(accountS).value).isEqualTo(Amount.Factory.amount(25_000L));
-        Assertions.assertThat(accountManager.balance(accountD).value).isEqualTo(Amount.Factory.amount(0L));
+        Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
+        Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
         ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD), 
                 0L, Instant.EPOCH.plusSeconds(500_000L), 0L);
 
         accountManager.accept(receiveDfromS);
 
-        Assertions.assertThat(accountManager.balance(accountS).value).isEqualTo(Amount.Factory.amount(25_000L));
-        Assertions.assertThat(accountManager.balance(accountD).value).isEqualTo(Amount.Factory.amount(5_000L));
+        Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
+        Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(5_000L));
 
     }
 

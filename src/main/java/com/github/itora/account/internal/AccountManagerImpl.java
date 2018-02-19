@@ -66,14 +66,26 @@ public final class AccountManagerImpl implements AccountManager {
     		}
     		@Override
     		public Void visitReceiveEvent(ReceiveEvent event) {
-    			TxId sourceTx = event.source();
+    			TxId sourceTxId = event.source();
+    		
     			Account account = null;
+    			for (Map.Entry<Account, Chain> entry : personalChains.entrySet()) {
+        	    	for (Tx tx : Chains.iterate(entry.getValue())) {
+        	    		if (event.previous.equals(tx.txId())) {
+        	    			account = entry.getKey();
+        	    			// We could also get back to the OpenTx
+        	    			break;
+        	    		}
+        	    	}
+        	    	if (account != null) {
+        	    		break;
+        	    	}
+    			}
+    			
     			Amount amount = null;
     			for (Map.Entry<Account, Chain> entry : personalChains.entrySet()) {
         	    	for (Tx tx : Chains.iterate(entry.getValue())) {
-        	    		if (sourceTx.equals(tx.txId())) {
-        	    			account = entry.getKey();
-        	    			
+        	    		if (sourceTxId.equals(tx.txId())) {
         	    			Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
         	            		@Override
         	            		public Optional<Amount> visitOpenTx(OpenTx tx) {
@@ -85,7 +97,7 @@ public final class AccountManagerImpl implements AccountManager {
         	            		}
         	            		@Override
         	            		public Optional<Amount> visitSendTx(SendTx tx) {
-        	            			return Optional.of(tx.amount);
+        	            			return Optional.of(tx.amount());
         	            		}
         	        		});
 
@@ -93,10 +105,11 @@ public final class AccountManagerImpl implements AccountManager {
         	    			break;
         	    		}
         	    	}
-        	    	if (account != null) {
+        	    	if (amount != null) {
         	    		break;
         	    	}
     			}
+    			
     	    	Tx tx = Tx.Factory.receiveTx(TxIds.txId(event), amount, event.timestamp());
     			add(account, tx);
     	    	return null;
