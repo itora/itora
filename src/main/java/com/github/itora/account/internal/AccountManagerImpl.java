@@ -1,10 +1,12 @@
 package com.github.itora.account.internal;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
 import com.github.itora.account.PersonalChain;
+import com.github.itora.account.PersonalChains;
 import com.github.itora.amount.Amount;
 import com.github.itora.amount.Amounts;
 import com.github.itora.event.Event;
@@ -15,9 +17,9 @@ import com.github.itora.tx.OpenTx;
 import com.github.itora.tx.ReceiveTx;
 import com.github.itora.tx.SendTx;
 import com.github.itora.tx.Tx;
+import com.github.itora.tx.TxId;
 import com.github.itora.tx.TxIds;
 import com.google.common.collect.Maps;
-
 
 public final class AccountManagerImpl implements AccountManager {
 
@@ -27,10 +29,9 @@ public final class AccountManagerImpl implements AccountManager {
 	}
 	
     public Amount balance(Account account) {
-    	PersonalChain personalChain = personalChains.get(account);
     	Amount sum = Amounts.ZERO;
-    	while (personalChain != null) {
-        	sum = Amounts.plus(sum, Tx.visit(personalChain.tx, new Tx.Visitor<Amount>() {
+    	for (Tx tx : PersonalChains.iterate(personalChains.get(account))) {
+        	sum = Amounts.plus(sum, Tx.visit(tx, new Tx.Visitor<Amount>() {
         		@Override
         		public Amount visitOpenTx(OpenTx tx) {
         			return Amounts.ZERO;
@@ -44,8 +45,7 @@ public final class AccountManagerImpl implements AccountManager {
         			return Amounts.invers(tx.amount());
         		}
     		}));
-    		personalChain = personalChain.previous;
-    	}
+		}
         return sum;
     }
 
@@ -60,14 +60,44 @@ public final class AccountManagerImpl implements AccountManager {
     		@Override
     		public Void visitOpenEvent(OpenEvent event) {
     			Account account = event.account();
-    	    	Tx tx = Tx.Factory.openTx(event.timestamp(), TxIds.txId(event));
+    	    	Tx tx = Tx.Factory.openTx(TxIds.txId(event), event.timestamp());
     			add(account, tx);
     			return null;
     		}
     		@Override
     		public Void visitReceiveEvent(ReceiveEvent event) {
-    			Account account = null; // TODO
-    	    	Tx tx = Tx.Factory.receiveTx(TxIds.txId(event), event.amount(), event.timestamp());
+    			TxId sourceTx = event.source();
+    			Account account = null;
+    			Amount amount = null;
+    			for (Map.Entry<Account, PersonalChain> entry : personalChains.entrySet()) {
+        	    	for (Tx tx : PersonalChains.iterate(entry.getValue())) {
+        	    		if (sourceTx.equals(tx.txId())) {
+        	    			account = entry.getKey();
+        	    			
+        	    			Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
+        	            		@Override
+        	            		public Optional<Amount> visitOpenTx(OpenTx tx) {
+        	            			return Optional.empty();
+        	            		}
+        	            		@Override
+        	            		public Optional<Amount> visitReceiveTx(ReceiveTx tx) {
+        	            			return Optional.empty();
+        	            		}
+        	            		@Override
+        	            		public Optional<Amount> visitSendTx(SendTx tx) {
+        	            			return Optional.of(tx.amount);
+        	            		}
+        	        		});
+
+        	    			amount = a.get();
+        	    			break;
+        	    		}
+        	    	}
+        	    	if (account != null) {
+        	    		break;
+        	    	}
+    			}
+    	    	Tx tx = Tx.Factory.receiveTx(TxIds.txId(event), amount, event.timestamp());
     			add(account, tx);
     	    	return null;
     		}
@@ -79,11 +109,5 @@ public final class AccountManagerImpl implements AccountManager {
     			return null;
     		}
 		});
-    }
-    
-    @Override
-    public Event generateSend(Amount amount, Account to) {
-    	//TODO 
-    	return null;
     }
 }
