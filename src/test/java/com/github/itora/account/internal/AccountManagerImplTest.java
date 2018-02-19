@@ -24,7 +24,7 @@ public class AccountManagerImplTest {
     }
 
     @Test
-    public void shouldPlayScenio1() {
+    public void shouldPlayScenario1() {
         Account accountEN = Account.Factory.account(0L);
         Account accountS = Account.Factory.account(1L);
         Account accountD = Account.Factory.account(2L);
