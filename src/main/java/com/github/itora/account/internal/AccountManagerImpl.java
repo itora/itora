@@ -33,4 +33,10 @@ public final class AccountManagerImpl implements AccountManager {
     	PersonalChainBlock block = new PersonalChainBlock(event.amount(), event.from());
     	personalChain.add(block);
     }
+    
+    @Override
+    public Event generateSend(Amount amount, Account to) {
+    	//TODO 
+    	return null;
+    }
 }
