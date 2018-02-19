@@ -1,0 +1,32 @@
+model com.github.itora.tx
+
+import java:java.time#Instant 
+import java:com.github.itora.account#Account
+import java:com.github.itora.amount#Amount
+
+type TxId {
+  val id: long 
+}
+
+type Tx = OpenTx | SendTx | ReceiveTx
+
+
+type OpenTx {
+    val timestamp: Instant
+    val txId: TxId
+}
+
+type SendTx {
+    val txId: TxId
+    val to: Account
+    val amount: Amount
+    val timestamp: Instant
+}
+
+type ReceiveTx {
+    val txId: TxId
+    val amount: Amount
+    val timestamp: Instant
+}
+
+

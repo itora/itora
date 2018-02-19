@@ -1,8 +1,12 @@
 model com.github.itora.event
 
 import java:java.time#Instant 
-import java:com.github.itora.account#Account 
-import java:com.github.itora.account#Amount 
+import java:com.github.itora.tx#TxId
+import java:com.github.itora.account#Account
+import java:com.github.itora.amount#Amount
+
+
+type Event = OpenEvent | SendEvent | ReceiveEvent
 
 
 type OpenEvent {
@@ -13,7 +17,7 @@ type OpenEvent {
 }
 
 type SendEvent {
-    val previous: BlockId
+    val previous: TxId
     val from: Account
     val to: Account
     val amount: Amount
@@ -23,8 +27,8 @@ type SendEvent {
 }
 
 type ReceiveEvent {
-    val previous: BlockId
-    val source: BlockId
+    val previous: TxId
+    val source: TxId
     val amount: Amount
     val pow: long
     val timestamp: Instant
@@ -32,13 +36,3 @@ type ReceiveEvent {
 }
 
 
-type Event = OpenEvent | SendEvent | ReceiveEvent
-
-type BlockId {
-  val hash: long
-}
-
-type Block {
-  val hash: BlockId
-  val event: Event
-}

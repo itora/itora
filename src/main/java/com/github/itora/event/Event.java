@@ -3,7 +3,8 @@ package com.github.itora.event;
 import java.time.Instant;
 
 import com.github.itora.account.Account;
-import com.github.itora.account.Amount;
+import com.github.itora.amount.Amount;
+import com.github.itora.tx.TxId;
 
 public abstract class Event {
 
@@ -16,11 +17,11 @@ public abstract class Event {
             return new OpenEvent(account, pow, timestamp, signature);
         }
 
-        public static SendEvent sendEvent(BlockId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
+        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
             return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
         }
 
-        public static ReceiveEvent receiveEvent(BlockId previous, BlockId source, Amount amount, long pow, Instant timestamp, long signature) {
+        public static ReceiveEvent receiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
             return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
         }
     }

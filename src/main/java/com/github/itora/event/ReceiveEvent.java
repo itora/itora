@@ -1,13 +1,14 @@
 package com.github.itora.event;
 
-import com.github.itora.account.Amount;
+import com.github.itora.amount.Amount;
 import java.time.Instant;
+import com.github.itora.tx.TxId;
 
 public final class ReceiveEvent extends Event {
 
-    public final BlockId previous;
+    public final TxId previous;
 
-    public final BlockId source;
+    public final TxId source;
 
     public final Amount amount;
 
@@ -17,7 +18,7 @@ public final class ReceiveEvent extends Event {
 
     public final long signature;
 
-    public ReceiveEvent(BlockId previous, BlockId source, Amount amount, long pow, Instant timestamp, long signature) {
+    public ReceiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
         this.previous = previous;
         this.source = source;
         this.amount = amount;
@@ -28,7 +29,7 @@ public final class ReceiveEvent extends Event {
 
     public interface Factory {
 
-        public static ReceiveEvent receiveEvent(BlockId previous, BlockId source, Amount amount, long pow, Instant timestamp, long signature) {
+        public static ReceiveEvent receiveEvent(TxId previous, TxId source, Amount amount, long pow, Instant timestamp, long signature) {
             return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
         }
     }
@@ -38,19 +39,19 @@ public final class ReceiveEvent extends Event {
         return visitor.visitReceiveEvent(this);
     }
 
-    public final BlockId previous() {
+    public final TxId previous() {
         return previous;
     }
 
-    public final ReceiveEvent withPrevious(BlockId previous) {
+    public final ReceiveEvent withPrevious(TxId previous) {
         return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
     }
 
-    public final BlockId source() {
+    public final TxId source() {
         return source;
     }
 
-    public final ReceiveEvent withSource(BlockId source) {
+    public final ReceiveEvent withSource(TxId source) {
         return new ReceiveEvent(previous, source, amount, pow, timestamp, signature);
     }
 
@@ -127,9 +128,9 @@ public final class ReceiveEvent extends Event {
 
     public static final class Builder {
 
-        public BlockId previous;
+        public TxId previous;
 
-        public BlockId source;
+        public TxId source;
 
         public Amount amount;
 
@@ -139,20 +140,20 @@ public final class ReceiveEvent extends Event {
 
         public long signature;
 
-        public final BlockId previous() {
+        public final TxId previous() {
             return previous;
         }
 
-        public final Builder previous(BlockId previous) {
+        public final Builder previous(TxId previous) {
             this.previous = previous;
             return this;
         }
 
-        public final BlockId source() {
+        public final TxId source() {
             return source;
         }
 
-        public final Builder source(BlockId source) {
+        public final Builder source(TxId source) {
             this.source = source;
             return this;
         }

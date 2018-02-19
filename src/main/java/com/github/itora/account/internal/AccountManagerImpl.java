@@ -5,8 +5,8 @@ import java.util.List;
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
 import com.github.itora.account.Amount;
-import com.github.itora.account.Event;
 import com.github.itora.account.PersonalChainBlock;
+import com.github.itora.event.Event;
 import com.google.common.collect.Lists;
 
 public final class AccountManagerImpl implements AccountManager {

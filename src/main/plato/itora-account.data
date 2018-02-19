@@ -1,0 +1,5 @@
+model com.github.itora.account
+
+type Account {
+    val number: long
+}

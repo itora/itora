@@ -1,0 +1,5 @@
+model com.github.itora.amount
+
+type Amount {
+    val value: long
+}

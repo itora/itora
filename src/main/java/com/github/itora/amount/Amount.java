@@ -1,26 +1,26 @@
-package com.github.itora.event;
+package com.github.itora.amount;
 
-public final class BlockId {
+public final class Amount {
 
-    public final long hash;
+    public final long value;
 
-    public BlockId(long hash) {
-        this.hash = hash;
+    public Amount(long value) {
+        this.value = value;
     }
 
     public interface Factory {
 
-        public static BlockId blockId(long hash) {
-            return new BlockId(hash);
+        public static Amount amount(long value) {
+            return new Amount(value);
         }
     }
 
-    public final long hash() {
-        return hash;
+    public final long value() {
+        return value;
     }
 
-    public final BlockId withHash(long hash) {
-        return new BlockId(hash);
+    public final Amount withValue(long value) {
+        return new Amount(value);
     }
 
     public static Builder builder() {
@@ -28,7 +28,7 @@ public final class BlockId {
     }
 
     public final Builder toBuilder() {
-        return BlockId.builder().hash(hash);
+        return Amount.builder().value(value);
     }
 
     @Override
@@ -42,35 +42,35 @@ public final class BlockId {
         if (getClass() != o.getClass()) {
             return false;
         }
-        BlockId that = (BlockId) o;
-        return java.util.Objects.equals(this.hash, that.hash);
+        Amount that = (Amount) o;
+        return java.util.Objects.equals(this.value, that.value);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(hash);
+        return java.util.Objects.hash(value);
     }
 
     @Override
     public final String toString() {
-        return "BlockId{hash = " + this.hash + "}";
+        return "Amount{value = " + this.value + "}";
     }
 
     public static final class Builder {
 
-        public long hash;
+        public long value;
 
-        public final long hash() {
-            return hash;
+        public final long value() {
+            return value;
         }
 
-        public final Builder hash(long hash) {
-            this.hash = hash;
+        public final Builder value(long value) {
+            this.value = value;
             return this;
         }
 
-        public final BlockId build() {
-            return new BlockId(hash);
+        public final Amount build() {
+            return new Amount(value);
         }
 
         @Override
@@ -84,18 +84,18 @@ public final class BlockId {
             if (getClass() != o.getClass()) {
                 return false;
             }
-            BlockId.Builder that = (BlockId.Builder) o;
-            return java.util.Objects.equals(this.hash, that.hash);
+            Amount.Builder that = (Amount.Builder) o;
+            return java.util.Objects.equals(this.value, that.value);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(hash);
+            return java.util.Objects.hash(value);
         }
 
         @Override
         public final String toString() {
-            return "BlockId.Builder{hash = " + this.hash + "}";
+            return "Amount.Builder{value = " + this.value + "}";
         }
     }
 }

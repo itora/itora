@@ -1,12 +1,13 @@
 package com.github.itora.event;
 
 import com.github.itora.account.Account;
-import com.github.itora.account.Amount;
+import com.github.itora.amount.Amount;
 import java.time.Instant;
+import com.github.itora.tx.TxId;
 
 public final class SendEvent extends Event {
 
-    public final BlockId previous;
+    public final TxId previous;
 
     public final Account from;
 
@@ -20,7 +21,7 @@ public final class SendEvent extends Event {
 
     public final long signature;
 
-    public SendEvent(BlockId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
+    public SendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
         this.previous = previous;
         this.from = from;
         this.to = to;
@@ -32,7 +33,7 @@ public final class SendEvent extends Event {
 
     public interface Factory {
 
-        public static SendEvent sendEvent(BlockId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
+        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
             return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
         }
     }
@@ -42,11 +43,11 @@ public final class SendEvent extends Event {
         return visitor.visitSendEvent(this);
     }
 
-    public final BlockId previous() {
+    public final TxId previous() {
         return previous;
     }
 
-    public final SendEvent withPrevious(BlockId previous) {
+    public final SendEvent withPrevious(TxId previous) {
         return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
     }
 
@@ -139,7 +140,7 @@ public final class SendEvent extends Event {
 
     public static final class Builder {
 
-        public BlockId previous;
+        public TxId previous;
 
         public Account from;
 
@@ -153,11 +154,11 @@ public final class SendEvent extends Event {
 
         public long signature;
 
-        public final BlockId previous() {
+        public final TxId previous() {
             return previous;
         }
 
-        public final Builder previous(BlockId previous) {
+        public final Builder previous(TxId previous) {
             this.previous = previous;
             return this;
         }
