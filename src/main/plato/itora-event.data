@@ -1,0 +1,41 @@
+model com.github.itora.event
+
+import java:java.time#Instant 
+import java:com.github.itora.account#Account 
+import java:com.github.itora.account#Amount 
+
+
+type OpenEvent {
+    val account: Account
+    val pow: long
+    val timestamp: Instant
+    val signature: long
+}
+
+type SendEvent {
+    val previous: long
+    val from: Account
+    val to: Account
+    val amount: long
+    val pow: long
+    val timestamp: Instant
+    val signature: long
+}
+
+type ReceiveEvent {
+    val previous: long
+    val source: Account
+    val to: Account
+    val amount: long
+    val pow: long
+    val timestamp: Instant
+    val signature: long
+}
+
+
+type Event = OpenEvent | SendEvent | ReceiveEvent
+
+type Block {
+  val hash: long
+  val event: Event
+}
