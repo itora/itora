@@ -13,20 +13,19 @@ type OpenEvent {
 }
 
 type SendEvent {
-    val previous: long
+    val previous: BlockId
     val from: Account
     val to: Account
-    val amount: long
+    val amount: Amount
     val pow: long
     val timestamp: Instant
     val signature: long
 }
 
 type ReceiveEvent {
-    val previous: long
-    val source: Account
-    val to: Account
-    val amount: long
+    val previous: BlockId
+    val source: BlockId
+    val amount: Amount
     val pow: long
     val timestamp: Instant
     val signature: long
@@ -35,7 +34,11 @@ type ReceiveEvent {
 
 type Event = OpenEvent | SendEvent | ReceiveEvent
 
-type Block {
+type BlockId {
   val hash: long
+}
+
+type Block {
+  val hash: BlockId
   val event: Event
 }

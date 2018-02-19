@@ -1,17 +1,18 @@
 package com.github.itora.event;
 
 import com.github.itora.account.Account;
+import com.github.itora.account.Amount;
 import java.time.Instant;
 
 public final class SendEvent extends Event {
 
-    public final long previous;
+    public final BlockId previous;
 
     public final Account from;
 
     public final Account to;
 
-    public final long amount;
+    public final Amount amount;
 
     public final long pow;
 
@@ -19,7 +20,7 @@ public final class SendEvent extends Event {
 
     public final long signature;
 
-    public SendEvent(long previous, Account from, Account to, long amount, long pow, Instant timestamp, long signature) {
+    public SendEvent(BlockId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
         this.previous = previous;
         this.from = from;
         this.to = to;
@@ -31,7 +32,7 @@ public final class SendEvent extends Event {
 
     public interface Factory {
 
-        public static SendEvent sendEvent(long previous, Account from, Account to, long amount, long pow, Instant timestamp, long signature) {
+        public static SendEvent sendEvent(BlockId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
             return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
         }
     }
@@ -41,11 +42,11 @@ public final class SendEvent extends Event {
         return visitor.visitSendEvent(this);
     }
 
-    public final long previous() {
+    public final BlockId previous() {
         return previous;
     }
 
-    public final SendEvent withPrevious(long previous) {
+    public final SendEvent withPrevious(BlockId previous) {
         return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
     }
 
@@ -65,11 +66,11 @@ public final class SendEvent extends Event {
         return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
     }
 
-    public final long amount() {
+    public final Amount amount() {
         return amount;
     }
 
-    public final SendEvent withAmount(long amount) {
+    public final SendEvent withAmount(Amount amount) {
         return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
     }
 
@@ -138,13 +139,13 @@ public final class SendEvent extends Event {
 
     public static final class Builder {
 
-        public long previous;
+        public BlockId previous;
 
         public Account from;
 
         public Account to;
 
-        public long amount;
+        public Amount amount;
 
         public long pow;
 
@@ -152,11 +153,11 @@ public final class SendEvent extends Event {
 
         public long signature;
 
-        public final long previous() {
+        public final BlockId previous() {
             return previous;
         }
 
-        public final Builder previous(long previous) {
+        public final Builder previous(BlockId previous) {
             this.previous = previous;
             return this;
         }
@@ -179,11 +180,11 @@ public final class SendEvent extends Event {
             return this;
         }
 
-        public final long amount() {
+        public final Amount amount() {
             return amount;
         }
 
-        public final Builder amount(long amount) {
+        public final Builder amount(Amount amount) {
             this.amount = amount;
             return this;
         }

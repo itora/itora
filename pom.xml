@@ -74,6 +74,33 @@
 
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>generate</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.primeval.hyparxis</groupId>
+						<artifactId>hyparxis-maven-plugin</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+						<executions>
+							<execution>
+								<id>default</id>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<outputDirectory>${basedir}/src/main/java</outputDirectory>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
 
 </project>
 

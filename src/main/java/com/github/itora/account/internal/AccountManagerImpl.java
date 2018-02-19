@@ -2,13 +2,12 @@ package com.github.itora.account.internal;
 
 import java.util.List;
 
-import org.assertj.core.util.Lists;
-
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
 import com.github.itora.account.Amount;
 import com.github.itora.account.Event;
 import com.github.itora.account.PersonalChainBlock;
+import com.google.common.collect.Lists;
 
 public final class AccountManagerImpl implements AccountManager {
 

@@ -2,27 +2,27 @@ package com.github.itora.event;
 
 public final class Block {
 
-    public final long hash;
+    public final BlockId hash;
 
     public final Event event;
 
-    public Block(long hash, Event event) {
+    public Block(BlockId hash, Event event) {
         this.hash = hash;
         this.event = event;
     }
 
     public interface Factory {
 
-        public static Block block(long hash, Event event) {
+        public static Block block(BlockId hash, Event event) {
             return new Block(hash, event);
         }
     }
 
-    public final long hash() {
+    public final BlockId hash() {
         return hash;
     }
 
-    public final Block withHash(long hash) {
+    public final Block withHash(BlockId hash) {
         return new Block(hash, event);
     }
 
@@ -69,15 +69,15 @@ public final class Block {
 
     public static final class Builder {
 
-        public long hash;
+        public BlockId hash;
 
         public Event event;
 
-        public final long hash() {
+        public final BlockId hash() {
             return hash;
         }
 
-        public final Builder hash(long hash) {
+        public final Builder hash(BlockId hash) {
             this.hash = hash;
             return this;
         }
