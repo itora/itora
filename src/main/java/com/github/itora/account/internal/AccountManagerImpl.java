@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
-import com.github.itora.account.PersonalChain;
-import com.github.itora.account.PersonalChains;
+import com.github.itora.account.Chain;
+import com.github.itora.account.Chains;
 import com.github.itora.amount.Amount;
 import com.github.itora.amount.Amounts;
 import com.github.itora.event.Event;
@@ -23,14 +23,14 @@ import com.google.common.collect.Maps;
 
 public final class AccountManagerImpl implements AccountManager {
 
-	private final Map<Account, PersonalChain> personalChains = Maps.newHashMap();
+	private final Map<Account, Chain> personalChains = Maps.newHashMap();
 	
 	public AccountManagerImpl() {
 	}
 	
     public Amount balance(Account account) {
     	Amount sum = Amounts.ZERO;
-    	for (Tx tx : PersonalChains.iterate(personalChains.get(account))) {
+    	for (Tx tx : Chains.iterate(personalChains.get(account))) {
         	sum = Amounts.plus(sum, Tx.visit(tx, new Tx.Visitor<Amount>() {
         		@Override
         		public Amount visitOpenTx(OpenTx tx) {
@@ -54,8 +54,8 @@ public final class AccountManagerImpl implements AccountManager {
     	// Check the event validity
     	Event.visit(event, new Event.Visitor<Void>() {
     		private void add(Account account, Tx tx) {
-    	    	PersonalChain personalChain = personalChains.get(account);
-    	    	personalChains.put(account, new PersonalChain(personalChain, tx));
+    	    	Chain personalChain = personalChains.get(account);
+    	    	personalChains.put(account, new Chain(personalChain, tx));
     		}
     		@Override
     		public Void visitOpenEvent(OpenEvent event) {
@@ -69,8 +69,8 @@ public final class AccountManagerImpl implements AccountManager {
     			TxId sourceTx = event.source();
     			Account account = null;
     			Amount amount = null;
-    			for (Map.Entry<Account, PersonalChain> entry : personalChains.entrySet()) {
-        	    	for (Tx tx : PersonalChains.iterate(entry.getValue())) {
+    			for (Map.Entry<Account, Chain> entry : personalChains.entrySet()) {
+        	    	for (Tx tx : Chains.iterate(entry.getValue())) {
         	    		if (sourceTx.equals(tx.txId())) {
         	    			account = entry.getKey();
         	    			

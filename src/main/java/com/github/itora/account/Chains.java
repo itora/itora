@@ -4,16 +4,16 @@ import java.util.Iterator;
 
 import com.github.itora.tx.Tx;
 
-public final class PersonalChains {
-	private PersonalChains() {
+public final class Chains {
+	private Chains() {
 	}
 	
-	public static Iterable<Tx> iterate(PersonalChain chain) {
+	public static Iterable<Tx> iterate(Chain chain) {
 		return new Iterable<Tx>() {
 			@Override
 			public Iterator<Tx> iterator() {
 				return new Iterator<Tx>() {
-					private PersonalChain next = chain;
+					private Chain next = chain;
 					@Override
 					public boolean hasNext() {
 						return (next != null);
