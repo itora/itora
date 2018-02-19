@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.github.itora</groupId>
+	<artifactId>itora</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>jar</packaging>
+
+	<name>Itora Project</name>
+
+
+	<scm>
+		<url>https://github.com/itora/itora</url>
+	</scm>
+
+	<properties>
+		<primeval-3rdparty-bom.version>1.0.0</primeval-3rdparty-bom.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.primeval</groupId>
+				<artifactId>primeval-thirdparty-bom</artifactId>
+				<version>${primeval-3rdparty-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+	</dependencies>
+
+
+</project>
+
