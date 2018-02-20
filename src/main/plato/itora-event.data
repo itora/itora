@@ -14,7 +14,6 @@ type OpenEvent {
     val account: Account
     val pow: long
     val timestamp: Instant
-    val signature: Signature
 }
 
 type SendEvent {
@@ -24,7 +23,6 @@ type SendEvent {
     val amount: Amount
     val pow: long
     val timestamp: Instant
-    val signature: Signature
 }
 
 type ReceiveEvent {
@@ -32,6 +30,10 @@ type ReceiveEvent {
     val source: TxId
     val pow: long
     val timestamp: Instant
+}
+
+type SignedEvent {
+    val event: Event
     val signature: Signature
 }
 
