@@ -1,27 +1,27 @@
 package com.github.itora.crypto;
 
-import java.nio.ByteBuffer;
+import com.github.itora.util.ByteArray;
 
 public final class PublicKey {
 
-    public final ByteBuffer value;
+    public final ByteArray value;
 
-    public PublicKey(ByteBuffer value) {
+    public PublicKey(ByteArray value) {
         this.value = value;
     }
 
     public interface Factory {
 
-        public static PublicKey publicKey(ByteBuffer value) {
+        public static PublicKey publicKey(ByteArray value) {
             return new PublicKey(value);
         }
     }
 
-    public final ByteBuffer value() {
+    public final ByteArray value() {
         return value;
     }
 
-    public final PublicKey withValue(ByteBuffer value) {
+    public final PublicKey withValue(ByteArray value) {
         return new PublicKey(value);
     }
 
@@ -60,13 +60,13 @@ public final class PublicKey {
 
     public static final class Builder {
 
-        public ByteBuffer value;
+        public ByteArray value;
 
-        public final ByteBuffer value() {
+        public final ByteArray value() {
             return value;
         }
 
-        public final Builder value(ByteBuffer value) {
+        public final Builder value(ByteArray value) {
             this.value = value;
             return this;
         }

@@ -1,27 +1,27 @@
 package com.github.itora.crypto;
 
-import java.nio.ByteBuffer;
+import com.github.itora.util.ByteArray;
 
 public final class Signature {
 
-    public final ByteBuffer value;
+    public final ByteArray value;
 
-    public Signature(ByteBuffer value) {
+    public Signature(ByteArray value) {
         this.value = value;
     }
 
     public interface Factory {
 
-        public static Signature signature(ByteBuffer value) {
+        public static Signature signature(ByteArray value) {
             return new Signature(value);
         }
     }
 
-    public final ByteBuffer value() {
+    public final ByteArray value() {
         return value;
     }
 
-    public final Signature withValue(ByteBuffer value) {
+    public final Signature withValue(ByteArray value) {
         return new Signature(value);
     }
 
@@ -60,13 +60,13 @@ public final class Signature {
 
     public static final class Builder {
 
-        public ByteBuffer value;
+        public ByteArray value;
 
-        public final ByteBuffer value() {
+        public final ByteArray value() {
             return value;
         }
 
-        public final Builder value(ByteBuffer value) {
+        public final Builder value(ByteArray value) {
             this.value = value;
             return this;
         }

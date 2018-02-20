@@ -1,26 +1,28 @@
 package com.github.itora.account;
 
+import com.github.itora.crypto.PublicKey;
+
 public final class Account {
 
-    public final long number;
+    public final PublicKey key;
 
-    public Account(long number) {
-        this.number = number;
+    public Account(PublicKey key) {
+        this.key = key;
     }
 
     public interface Factory {
 
-        public static Account account(long number) {
-            return new Account(number);
+        public static Account account(PublicKey key) {
+            return new Account(key);
         }
     }
 
-    public final long number() {
-        return number;
+    public final PublicKey key() {
+        return key;
     }
 
-    public final Account withNumber(long number) {
-        return new Account(number);
+    public final Account withKey(PublicKey key) {
+        return new Account(key);
     }
 
     public static Builder builder() {
@@ -28,7 +30,7 @@ public final class Account {
     }
 
     public final Builder toBuilder() {
-        return Account.builder().number(number);
+        return Account.builder().key(key);
     }
 
     @Override
@@ -43,34 +45,34 @@ public final class Account {
             return false;
         }
         Account that = (Account) o;
-        return java.util.Objects.equals(this.number, that.number);
+        return java.util.Objects.equals(this.key, that.key);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(number);
+        return java.util.Objects.hash(key);
     }
 
     @Override
     public final String toString() {
-        return "Account{number = " + this.number + "}";
+        return "Account{key = " + this.key + "}";
     }
 
     public static final class Builder {
 
-        public long number;
+        public PublicKey key;
 
-        public final long number() {
-            return number;
+        public final PublicKey key() {
+            return key;
         }
 
-        public final Builder number(long number) {
-            this.number = number;
+        public final Builder key(PublicKey key) {
+            this.key = key;
             return this;
         }
 
         public final Account build() {
-            return new Account(number);
+            return new Account(key);
         }
 
         @Override
@@ -85,17 +87,17 @@ public final class Account {
                 return false;
             }
             Account.Builder that = (Account.Builder) o;
-            return java.util.Objects.equals(this.number, that.number);
+            return java.util.Objects.equals(this.key, that.key);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(number);
+            return java.util.Objects.hash(key);
         }
 
         @Override
         public final String toString() {
-            return "Account.Builder{number = " + this.number + "}";
+            return "Account.Builder{key = " + this.key + "}";
         }
     }
 }
