@@ -66,7 +66,7 @@ public final class AsymmetricKeys {
 		}
 	}
 
-	public static boolean verify(Signature signature, ByteBuffer buffer, PublicKey publicKey) {
+	public static void verify(Signature signature, ByteBuffer buffer, PublicKey publicKey) {
 		ByteBuffer b = buffer.duplicate();
 
 		try {
@@ -77,7 +77,9 @@ public final class AsymmetricKeys {
 			s.initVerify(k);
 			s.update(b);
 	
-			return s.verify(signature.value().bytes);
+			if (!s.verify(signature.value().bytes)) {
+				throw new CryptoException("Bad signature");
+			}
 		} catch (Exception e) {
 			throw new CryptoException(e);
 		}
