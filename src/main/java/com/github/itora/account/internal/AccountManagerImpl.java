@@ -176,6 +176,7 @@ public final class AccountManagerImpl implements AccountManager {
     }
 
     private static BlockValiditation checkBlockValidity(Lattice lattice, TxId previous) {
+        // TODO handle block de-duplication
         Block previousBlock = findBlock(lattice, previous);
 
         if (previousBlock == null) {
