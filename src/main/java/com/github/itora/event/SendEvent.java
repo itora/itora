@@ -3,6 +3,7 @@ package com.github.itora.event;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import java.time.Instant;
+import com.github.itora.crypto.Signature;
 import com.github.itora.tx.TxId;
 
 public final class SendEvent extends Event {
@@ -19,9 +20,9 @@ public final class SendEvent extends Event {
 
     public final Instant timestamp;
 
-    public final long signature;
+    public final Signature signature;
 
-    public SendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
+    public SendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, Signature signature) {
         this.previous = previous;
         this.from = from;
         this.to = to;
@@ -33,7 +34,7 @@ public final class SendEvent extends Event {
 
     public interface Factory {
 
-        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, long signature) {
+        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, Signature signature) {
             return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
         }
     }
@@ -96,12 +97,12 @@ public final class SendEvent extends Event {
     }
 
     @Override
-    public final long signature() {
+    public final Signature signature() {
         return signature;
     }
 
     @Override
-    public final SendEvent withSignature(long signature) {
+    public final SendEvent withSignature(Signature signature) {
         return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
     }
 
@@ -152,7 +153,7 @@ public final class SendEvent extends Event {
 
         public Instant timestamp;
 
-        public long signature;
+        public Signature signature;
 
         public final TxId previous() {
             return previous;
@@ -208,11 +209,11 @@ public final class SendEvent extends Event {
             return this;
         }
 
-        public final long signature() {
+        public final Signature signature() {
             return signature;
         }
 
-        public final Builder signature(long signature) {
+        public final Builder signature(Signature signature) {
             this.signature = signature;
             return this;
         }

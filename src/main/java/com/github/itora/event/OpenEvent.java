@@ -2,6 +2,7 @@ package com.github.itora.event;
 
 import com.github.itora.account.Account;
 import java.time.Instant;
+import com.github.itora.crypto.Signature;
 
 public final class OpenEvent extends Event {
 
@@ -11,9 +12,9 @@ public final class OpenEvent extends Event {
 
     public final Instant timestamp;
 
-    public final long signature;
+    public final Signature signature;
 
-    public OpenEvent(Account account, long pow, Instant timestamp, long signature) {
+    public OpenEvent(Account account, long pow, Instant timestamp, Signature signature) {
         this.account = account;
         this.pow = pow;
         this.timestamp = timestamp;
@@ -22,7 +23,7 @@ public final class OpenEvent extends Event {
 
     public interface Factory {
 
-        public static OpenEvent openEvent(Account account, long pow, Instant timestamp, long signature) {
+        public static OpenEvent openEvent(Account account, long pow, Instant timestamp, Signature signature) {
             return new OpenEvent(account, pow, timestamp, signature);
         }
     }
@@ -61,12 +62,12 @@ public final class OpenEvent extends Event {
     }
 
     @Override
-    public final long signature() {
+    public final Signature signature() {
         return signature;
     }
 
     @Override
-    public final OpenEvent withSignature(long signature) {
+    public final OpenEvent withSignature(Signature signature) {
         return new OpenEvent(account, pow, timestamp, signature);
     }
 
@@ -111,7 +112,7 @@ public final class OpenEvent extends Event {
 
         public Instant timestamp;
 
-        public long signature;
+        public Signature signature;
 
         public final Account account() {
             return account;
@@ -140,11 +141,11 @@ public final class OpenEvent extends Event {
             return this;
         }
 
-        public final long signature() {
+        public final Signature signature() {
             return signature;
         }
 
-        public final Builder signature(long signature) {
+        public final Builder signature(Signature signature) {
             this.signature = signature;
             return this;
         }

@@ -1,6 +1,7 @@
 package com.github.itora.event;
 
 import java.time.Instant;
+import com.github.itora.crypto.Signature;
 import com.github.itora.tx.TxId;
 
 public final class ReceiveEvent extends Event {
@@ -13,9 +14,9 @@ public final class ReceiveEvent extends Event {
 
     public final Instant timestamp;
 
-    public final long signature;
+    public final Signature signature;
 
-    public ReceiveEvent(TxId previous, TxId source, long pow, Instant timestamp, long signature) {
+    public ReceiveEvent(TxId previous, TxId source, long pow, Instant timestamp, Signature signature) {
         this.previous = previous;
         this.source = source;
         this.pow = pow;
@@ -25,7 +26,7 @@ public final class ReceiveEvent extends Event {
 
     public interface Factory {
 
-        public static ReceiveEvent receiveEvent(TxId previous, TxId source, long pow, Instant timestamp, long signature) {
+        public static ReceiveEvent receiveEvent(TxId previous, TxId source, long pow, Instant timestamp, Signature signature) {
             return new ReceiveEvent(previous, source, pow, timestamp, signature);
         }
     }
@@ -72,12 +73,12 @@ public final class ReceiveEvent extends Event {
     }
 
     @Override
-    public final long signature() {
+    public final Signature signature() {
         return signature;
     }
 
     @Override
-    public final ReceiveEvent withSignature(long signature) {
+    public final ReceiveEvent withSignature(Signature signature) {
         return new ReceiveEvent(previous, source, pow, timestamp, signature);
     }
 
@@ -124,7 +125,7 @@ public final class ReceiveEvent extends Event {
 
         public Instant timestamp;
 
-        public long signature;
+        public Signature signature;
 
         public final TxId previous() {
             return previous;
@@ -162,11 +163,11 @@ public final class ReceiveEvent extends Event {
             return this;
         }
 
-        public final long signature() {
+        public final Signature signature() {
             return signature;
         }
 
-        public final Builder signature(long signature) {
+        public final Builder signature(Signature signature) {
             this.signature = signature;
             return this;
         }
