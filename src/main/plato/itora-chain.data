@@ -8,7 +8,10 @@ type Lattice {
     val chains: Map[Account, Chain]
 }
 
-type Chain {
+type Chain = ChainRoot | ChainLink
+
+type ChainRoot {}
+type ChainLink {
     val previous: Chain
     val tx: Tx
 }

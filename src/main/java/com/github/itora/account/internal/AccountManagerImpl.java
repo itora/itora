@@ -77,7 +77,7 @@ public final class AccountManagerImpl implements AccountManager {
 
                 Tx tx = Tx.Factory.openTx(TxIds.txId(event), event.timestamp());
 
-                Chain chain = Chain.Factory.chain(Chains.ROOT, tx);
+                Chain chain = Chain.Factory.chainLink(Chains.ROOT, tx);
 
                 return lattice.withChains(lattice.chains().put(account, chain));
             }
@@ -106,7 +106,7 @@ public final class AccountManagerImpl implements AccountManager {
             }
 
             private Lattice add(Account account, Chain previous, Tx tx) {
-                Chain chain = Chain.Factory.chain(previous, tx);
+                Chain chain = Chain.Factory.chainLink(previous, tx);
 
                 return lattice.withChains(lattice.chains().put(account, chain));
             }

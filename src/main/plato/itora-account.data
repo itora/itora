@@ -1,5 +1,7 @@
 model com.github.itora.account
 
+import java:com.github.itora.crypto#PublicKey 
+
 type Account {
-    val number: long
+    val number: long 
 }

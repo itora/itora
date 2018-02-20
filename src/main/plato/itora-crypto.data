@@ -1,0 +1,21 @@
+model com.github.itora.crypto
+
+import java:java.nio#ByteBuffer
+
+type Signature {
+    val value: ByteBuffer
+}
+
+type PublicKey {
+    val value: ByteBuffer
+}
+
+type PrivateKey {
+    val value: ByteBuffer
+}
+
+type AsymmetricKey {
+	val publicKey: PublicKey
+	val privateKey: PrivateKey
+}
+
