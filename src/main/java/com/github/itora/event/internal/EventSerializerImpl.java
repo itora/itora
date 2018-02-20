@@ -10,6 +10,7 @@ import com.github.itora.event.EventSerializer;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
 import com.github.itora.event.SendEvent;
+import com.github.itora.event.SerializationException;
 import com.github.itora.tx.TxId;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;

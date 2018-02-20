@@ -1,4 +1,4 @@
-package com.github.itora.event.internal;
+package com.github.itora.event;
 
 public final class SerializationException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
