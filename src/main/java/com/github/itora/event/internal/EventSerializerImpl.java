@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
+import com.github.itora.crypto.PublicKey;
 import com.github.itora.event.Event;
 import com.github.itora.event.EventSerializer;
 import com.github.itora.event.OpenEvent;
@@ -12,6 +13,7 @@ import com.github.itora.event.ReceiveEvent;
 import com.github.itora.event.SendEvent;
 import com.github.itora.event.SerializationException;
 import com.github.itora.tx.TxId;
+import com.github.itora.util.ByteArray;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
@@ -71,6 +73,21 @@ public final class EventSerializerImpl implements EventSerializer {
 			buffer.putLong(value);
 		}
 	}
+	private static final class PublicKeyToByteBuffer implements ToByteBuffer {
+		private final PublicKey value;
+		public PublicKeyToByteBuffer(PublicKey value) {
+			this.value = value;
+		}
+		@Override
+		public int size() {
+			return Ints.BYTES + value.value.bytes.length;
+		}
+		@Override
+		public void appendTo(ByteBuffer buffer) {
+			buffer.putInt(value.value.bytes.length); //TODO Optimize size
+			buffer.put(value.value.bytes);
+		}
+	}
 	private static final class InstantToByteBuffer implements ToByteBuffer {
 		private final Instant value;
 		public InstantToByteBuffer(Instant value) {
@@ -107,44 +124,51 @@ public final class EventSerializerImpl implements EventSerializer {
     		public ByteBuffer visitOpenEvent(OpenEvent event) {
     			return build(
     				EventKind.OPEN,
-					new LongToByteBuffer(event.account().number),
+					new PublicKeyToByteBuffer(event.account().key()),
 					new LongToByteBuffer(event.signature()),
-					new LongToByteBuffer(event.pow),
-					new InstantToByteBuffer(event.timestamp)
+					new LongToByteBuffer(event.pow()),
+					new InstantToByteBuffer(event.timestamp())
     			);
     		}
     		@Override
     		public ByteBuffer visitReceiveEvent(ReceiveEvent event) {
     			return build(
     				EventKind.RECEIVE,
-					new LongToByteBuffer(event.previous.id),
-					new LongToByteBuffer(event.source.id),
+					new LongToByteBuffer(event.previous().id()),
+					new LongToByteBuffer(event.source().id()),
 					new LongToByteBuffer(event.signature()),
-					new LongToByteBuffer(event.pow),
-					new InstantToByteBuffer(event.timestamp)
+					new LongToByteBuffer(event.pow()),
+					new InstantToByteBuffer(event.timestamp())
     			);
     		}
     		@Override
     		public ByteBuffer visitSendEvent(SendEvent event) {
     			return build(
     				EventKind.SEND,
-					new LongToByteBuffer(event.previous.id),
-					new LongToByteBuffer(event.from.number),
-					new LongToByteBuffer(event.to.number),
-					new LongToByteBuffer(event.amount.value),
+					new LongToByteBuffer(event.previous().id()),
+					new PublicKeyToByteBuffer(event.from().key()),
+					new PublicKeyToByteBuffer(event.to().key()),
+					new LongToByteBuffer(event.amount().value()),
 					new LongToByteBuffer(event.signature()),
-					new LongToByteBuffer(event.pow),
-					new InstantToByteBuffer(event.timestamp)
+					new LongToByteBuffer(event.pow()),
+					new InstantToByteBuffer(event.timestamp())
     			);
     		}
     	});
+	}
+	
+	private static Account accountFrom(ByteBuffer buffer) {
+		int size = buffer.getInt();
+		byte[] bytes = new byte[size]; //TODO Verif too big sizes
+		buffer.get(bytes);
+		return Account.Factory.account(PublicKey.Factory.publicKey(new ByteArray(bytes)));
 	}
 	
 	@Override
 	public Event deserialize(ByteBuffer buffer) {
 		switch (EventKind.parse(buffer)) {
 		case OPEN: {
-			Account account = Account.Factory.account(buffer.getLong());
+			Account account = accountFrom(buffer);
 			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
@@ -160,8 +184,8 @@ public final class EventSerializerImpl implements EventSerializer {
 		}
 		case SEND: {
 			TxId previous = TxId.Factory.txId(buffer.getLong());
-			Account from = Account.Factory.account(buffer.getLong());
-			Account to = Account.Factory.account(buffer.getLong());
+			Account from = accountFrom(buffer);
+			Account to = accountFrom(buffer);
 			Amount amount = Amount.Factory.amount(buffer.getLong());
 			long signature = buffer.getLong();
 			long pow = buffer.getLong();
