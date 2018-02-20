@@ -1,5 +1,7 @@
 package com.github.itora.util;
 
+import com.google.common.io.BaseEncoding;
+
 public final class ByteArray {
     
     public final byte[] bytes;
@@ -8,4 +10,28 @@ public final class ByteArray {
         this.bytes = bytes;
     }
 
+    @Override
+    public String toString() {
+    	return BaseEncoding.base64().encode(bytes);
+    }
+    
+    @Override
+    public final int hashCode() {
+        return java.util.Arrays.hashCode(bytes);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
+        if (getClass() != o.getClass()) {
+            return false;
+        }
+        ByteArray that = (ByteArray) o;
+        return java.util.Arrays.equals(this.bytes, that.bytes);
+    }
 }

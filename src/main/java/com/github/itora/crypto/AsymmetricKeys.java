@@ -15,7 +15,8 @@ public final class AsymmetricKeys {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 	}
 
-	private static final SecureRandom RANDOM = new SecureRandom();
+	// Allegedly thread-safe
+	public static final SecureRandom RANDOM = new SecureRandom();
 	
 	private AsymmetricKeys() {
 	}
@@ -36,7 +37,7 @@ public final class AsymmetricKeys {
 		ByteBuffer b = buffer.duplicate();
 
 		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 			java.security.PrivateKey k = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKey.value.bytes));
 
 			java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");
@@ -53,7 +54,7 @@ public final class AsymmetricKeys {
 		ByteBuffer b = buffer.duplicate();
 
 		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 			java.security.PublicKey k = keyFactory.generatePublic(new X509EncodedKeySpec(publicKey.value().bytes));
 	
 			java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");

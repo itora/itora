@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
+import com.github.itora.crypto.AsymmetricKey;
+import com.github.itora.crypto.AsymmetricKeys;
 import com.github.itora.event.Event;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
@@ -29,8 +31,11 @@ public class EventSerializerImplTest {
 
     @Test
     public void shouldSerializeDeserialize() {
-        Account accountEN = Account.Factory.account(0L);
-        Account accountS = Account.Factory.account(1L);
+        AsymmetricKey keyEN = AsymmetricKeys.generate();
+        AsymmetricKey keyS = AsymmetricKeys.generate();
+
+        Account accountEN = Account.Factory.account(keyEN.publicKey());
+        Account accountS = Account.Factory.account(keyS.publicKey());
 
         OpenEvent open = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH, 0L);
         SendEvent send = Event.Factory.sendEvent(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
