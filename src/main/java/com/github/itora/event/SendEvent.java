@@ -3,7 +3,6 @@ package com.github.itora.event;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import java.time.Instant;
-import com.github.itora.crypto.Signature;
 import com.github.itora.tx.TxId;
 
 public final class SendEvent extends Event {
@@ -20,22 +19,19 @@ public final class SendEvent extends Event {
 
     public final Instant timestamp;
 
-    public final Signature signature;
-
-    public SendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, Signature signature) {
+    public SendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp) {
         this.previous = previous;
         this.from = from;
         this.to = to;
         this.amount = amount;
         this.pow = pow;
         this.timestamp = timestamp;
-        this.signature = signature;
     }
 
     public interface Factory {
 
-        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp, Signature signature) {
-            return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        public static SendEvent sendEvent(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp) {
+            return new SendEvent(previous, from, to, amount, pow, timestamp);
         }
     }
 
@@ -49,7 +45,7 @@ public final class SendEvent extends Event {
     }
 
     public final SendEvent withPrevious(TxId previous) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     public final Account from() {
@@ -57,7 +53,7 @@ public final class SendEvent extends Event {
     }
 
     public final SendEvent withFrom(Account from) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     public final Account to() {
@@ -65,7 +61,7 @@ public final class SendEvent extends Event {
     }
 
     public final SendEvent withTo(Account to) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     public final Amount amount() {
@@ -73,7 +69,7 @@ public final class SendEvent extends Event {
     }
 
     public final SendEvent withAmount(Amount amount) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     @Override
@@ -83,7 +79,7 @@ public final class SendEvent extends Event {
 
     @Override
     public final SendEvent withPow(long pow) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     @Override
@@ -93,17 +89,7 @@ public final class SendEvent extends Event {
 
     @Override
     public final SendEvent withTimestamp(Instant timestamp) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
-    }
-
-    @Override
-    public final Signature signature() {
-        return signature;
-    }
-
-    @Override
-    public final SendEvent withSignature(Signature signature) {
-        return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+        return new SendEvent(previous, from, to, amount, pow, timestamp);
     }
 
     public static Builder builder() {
@@ -111,7 +97,7 @@ public final class SendEvent extends Event {
     }
 
     public final Builder toBuilder() {
-        return SendEvent.builder().previous(previous).from(from).to(to).amount(amount).pow(pow).timestamp(timestamp).signature(signature);
+        return SendEvent.builder().previous(previous).from(from).to(to).amount(amount).pow(pow).timestamp(timestamp);
     }
 
     @Override
@@ -126,17 +112,17 @@ public final class SendEvent extends Event {
             return false;
         }
         SendEvent that = (SendEvent) o;
-        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(previous, from, to, amount, pow, timestamp, signature);
+        return java.util.Objects.hash(previous, from, to, amount, pow, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "SendEvent{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+        return "SendEvent{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
@@ -152,8 +138,6 @@ public final class SendEvent extends Event {
         public long pow;
 
         public Instant timestamp;
-
-        public Signature signature;
 
         public final TxId previous() {
             return previous;
@@ -209,17 +193,8 @@ public final class SendEvent extends Event {
             return this;
         }
 
-        public final Signature signature() {
-            return signature;
-        }
-
-        public final Builder signature(Signature signature) {
-            this.signature = signature;
-            return this;
-        }
-
         public final SendEvent build() {
-            return new SendEvent(previous, from, to, amount, pow, timestamp, signature);
+            return new SendEvent(previous, from, to, amount, pow, timestamp);
         }
 
         @Override
@@ -234,17 +209,17 @@ public final class SendEvent extends Event {
                 return false;
             }
             SendEvent.Builder that = (SendEvent.Builder) o;
-            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(previous, from, to, amount, pow, timestamp, signature);
+            return java.util.Objects.hash(previous, from, to, amount, pow, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "SendEvent.Builder{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+            return "SendEvent.Builder{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

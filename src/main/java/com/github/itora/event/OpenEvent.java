@@ -2,7 +2,6 @@ package com.github.itora.event;
 
 import com.github.itora.account.Account;
 import java.time.Instant;
-import com.github.itora.crypto.Signature;
 
 public final class OpenEvent extends Event {
 
@@ -12,19 +11,16 @@ public final class OpenEvent extends Event {
 
     public final Instant timestamp;
 
-    public final Signature signature;
-
-    public OpenEvent(Account account, long pow, Instant timestamp, Signature signature) {
+    public OpenEvent(Account account, long pow, Instant timestamp) {
         this.account = account;
         this.pow = pow;
         this.timestamp = timestamp;
-        this.signature = signature;
     }
 
     public interface Factory {
 
-        public static OpenEvent openEvent(Account account, long pow, Instant timestamp, Signature signature) {
-            return new OpenEvent(account, pow, timestamp, signature);
+        public static OpenEvent openEvent(Account account, long pow, Instant timestamp) {
+            return new OpenEvent(account, pow, timestamp);
         }
     }
 
@@ -38,7 +34,7 @@ public final class OpenEvent extends Event {
     }
 
     public final OpenEvent withAccount(Account account) {
-        return new OpenEvent(account, pow, timestamp, signature);
+        return new OpenEvent(account, pow, timestamp);
     }
 
     @Override
@@ -48,7 +44,7 @@ public final class OpenEvent extends Event {
 
     @Override
     public final OpenEvent withPow(long pow) {
-        return new OpenEvent(account, pow, timestamp, signature);
+        return new OpenEvent(account, pow, timestamp);
     }
 
     @Override
@@ -58,17 +54,7 @@ public final class OpenEvent extends Event {
 
     @Override
     public final OpenEvent withTimestamp(Instant timestamp) {
-        return new OpenEvent(account, pow, timestamp, signature);
-    }
-
-    @Override
-    public final Signature signature() {
-        return signature;
-    }
-
-    @Override
-    public final OpenEvent withSignature(Signature signature) {
-        return new OpenEvent(account, pow, timestamp, signature);
+        return new OpenEvent(account, pow, timestamp);
     }
 
     public static Builder builder() {
@@ -76,7 +62,7 @@ public final class OpenEvent extends Event {
     }
 
     public final Builder toBuilder() {
-        return OpenEvent.builder().account(account).pow(pow).timestamp(timestamp).signature(signature);
+        return OpenEvent.builder().account(account).pow(pow).timestamp(timestamp);
     }
 
     @Override
@@ -91,17 +77,17 @@ public final class OpenEvent extends Event {
             return false;
         }
         OpenEvent that = (OpenEvent) o;
-        return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+        return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(account, pow, timestamp, signature);
+        return java.util.Objects.hash(account, pow, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "OpenEvent{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+        return "OpenEvent{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
@@ -111,8 +97,6 @@ public final class OpenEvent extends Event {
         public long pow;
 
         public Instant timestamp;
-
-        public Signature signature;
 
         public final Account account() {
             return account;
@@ -141,17 +125,8 @@ public final class OpenEvent extends Event {
             return this;
         }
 
-        public final Signature signature() {
-            return signature;
-        }
-
-        public final Builder signature(Signature signature) {
-            this.signature = signature;
-            return this;
-        }
-
         public final OpenEvent build() {
-            return new OpenEvent(account, pow, timestamp, signature);
+            return new OpenEvent(account, pow, timestamp);
         }
 
         @Override
@@ -166,17 +141,17 @@ public final class OpenEvent extends Event {
                 return false;
             }
             OpenEvent.Builder that = (OpenEvent.Builder) o;
-            return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp) && java.util.Objects.equals(this.signature, that.signature);
+            return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(account, pow, timestamp, signature);
+            return java.util.Objects.hash(account, pow, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "OpenEvent.Builder{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + ", signature = " + this.signature + "}";
+            return "OpenEvent.Builder{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

@@ -9,6 +9,8 @@ public interface AccountManager {
 
     void accept(Event event);
 
+    Event generateSend(Amount amount, Account to);
+
     default void accept(Event... events) {
         for (Event event : events) {
             accept(event);
