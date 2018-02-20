@@ -4,6 +4,7 @@ import java:java.time#Instant
 import java:com.github.itora.tx#TxId
 import java:com.github.itora.account#Account
 import java:com.github.itora.amount#Amount
+import java:com.github.itora.crypto#Signature
 
 
 type Event = OpenEvent | SendEvent | ReceiveEvent
@@ -13,7 +14,7 @@ type OpenEvent {
     val account: Account
     val pow: long
     val timestamp: Instant
-    val signature: long
+    val signature: Signature
 }
 
 type SendEvent {
@@ -23,7 +24,7 @@ type SendEvent {
     val amount: Amount
     val pow: long
     val timestamp: Instant
-    val signature: long
+    val signature: Signature
 }
 
 type ReceiveEvent {
@@ -31,7 +32,7 @@ type ReceiveEvent {
     val source: TxId
     val pow: long
     val timestamp: Instant
-    val signature: long
+    val signature: Signature
 }
 
 

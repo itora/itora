@@ -69,6 +69,14 @@ public final class AccountManagerImpl implements AccountManager {
 
             @Override
             public Lattice visitOpenEvent(OpenEvent event) {
+                TxId txId = TxIds.txId(event);
+
+                // Check if this block was already processed!
+                Block thisBlock = findBlock(lattice, txId);
+                if (thisBlock != null) {
+                    return lattice;
+                }
+
                 Account account = event.account();
                 Chain previous = lattice.chains.get(account);
 
@@ -77,7 +85,7 @@ public final class AccountManagerImpl implements AccountManager {
                     return lattice;
                 }
 
-                Tx tx = Tx.Factory.openTx(TxIds.txId(event), event.timestamp());
+                Tx tx = Tx.Factory.openTx(txId, event.timestamp());
 
                 Chain chain = Chain.Factory.chainLink(Chains.ROOT, tx);
 
@@ -86,22 +94,51 @@ public final class AccountManagerImpl implements AccountManager {
 
             @Override
             public Lattice visitReceiveEvent(ReceiveEvent event) {
-                TxId sourceTxId = event.source();
+                Block previousBlock = checkBlockValidity(lattice, event.signature, event.previous);
+                TxId txId = TxIds.txId(event);
 
-                Account account = findAccount(lattice, event);
+                // Check if this block was already processed!
+                Block thisBlock = findBlock(lattice, txId);
+                if (thisBlock != null) {
+                    return lattice;
+                }
+
+                TxId sourceTxId = event.source();
 
                 Amount amount = findAmount(lattice, sourceTxId);
 
-                Tx tx = Tx.Factory.receiveTx(TxIds.txId(event), amount, event.timestamp());
-                Chain previous = lattice.chains.get(account);
+                Tx tx = Tx.Factory.receiveTx(txId, amount, event.timestamp());
+                Chain previous = lattice.chains.get(previousBlock.account);
 
-                return add(account, previous, tx);
+                return add(previousBlock.account, previous, tx);
+            }
+
+            private Block checkBlockValidity(Lattice lattice, long signature, TxId previous) {
+                Block previousBlock = findBlock(lattice, previous);
+                
+                if (previousBlock == null) {
+                    // Dangling block?!
+                }
+
+                if (!Chains.isHead(previousBlock.txId, previousBlock.chain)) {
+                    // 
+                }
+                return previousBlock;
             }
 
             @Override
             public Lattice visitSendEvent(SendEvent event) {
+                TxId txId = TxIds.txId(event);
+
+                // Check if this block was already processed!
+                Block thisBlock = findBlock(lattice, txId);
+                if (thisBlock != null) {
+                    return lattice;
+                }
+
                 Account account = event.from();
-                Tx tx = Tx.Factory.sendTx(TxIds.txId(event), event.to(), event.amount(), event.timestamp());
+
+                Tx tx = Tx.Factory.sendTx(txId, event.to(), event.amount(), event.timestamp());
                 Chain previous = lattice.chains.get(account);
                 return add(account, previous, tx);
 
@@ -148,21 +185,40 @@ public final class AccountManagerImpl implements AccountManager {
         return amount;
     }
 
-    private static Account findAccount(Lattice lattice, ReceiveEvent event) {
-        Account account = null;
+    private static Block findBlock(Lattice lattice, TxId txId) {
+        Tx foundTx = null;
+        Account foundAccount = null;
+        Chain foundChain = null;
         for (java.util.Map.Entry<Account, Chain> entry : lattice.chains.asMap().entrySet()) {
-            for (Tx tx : Chains.iterate(entry.getValue())) {
-                if (event.previous.equals(tx.txId())) {
-                    account = entry.getKey();
+            Chain chain = entry.getValue();
+            for (Tx tx : Chains.iterate(chain)) {
+                if (txId.equals(tx.txId())) {
+                    foundAccount = entry.getKey();
+                    foundTx = tx;
+                    foundChain = chain;
                     // We could also get back to the OpenTx
                     break;
                 }
             }
-            if (account != null) {
+            if (foundAccount != null) {
                 break;
             }
         }
-        return account;
+        return foundTx == null ? null : new Block(foundAccount, foundChain, foundTx, txId);
     }
 
+}
+
+final class Block {
+    public final Account account;
+    public final Chain chain;
+    public final Tx tx;
+    public final TxId txId;
+
+    public Block(Account account, Chain chain, Tx tx, TxId txId) {
+        this.account = account;
+        this.chain = chain;
+        this.tx = tx;
+        this.txId = txId;
+    }
 }

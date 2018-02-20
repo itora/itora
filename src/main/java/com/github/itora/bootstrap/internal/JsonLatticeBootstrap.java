@@ -3,7 +3,7 @@ package com.github.itora.bootstrap.internal;
 import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.chain.Lattice;
 
-public final class LatticeBootstrapImpl implements LatticeBootstrap {
+public final class JsonLatticeBootstrap implements LatticeBootstrap {
 
     @Override
     public Lattice bootstrap() {
