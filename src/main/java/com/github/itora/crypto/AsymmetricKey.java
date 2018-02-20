@@ -1,38 +1,36 @@
 package com.github.itora.crypto;
 
-import com.github.itora.util.ByteArray;
-
 public final class AsymmetricKey {
 
-    public final ByteArray publicKey;
+    public final PublicKey publicKey;
 
-    public final ByteArray privateKey;
+    public final PrivateKey privateKey;
 
-    public AsymmetricKey(ByteArray publicKey, ByteArray privateKey) {
+    public AsymmetricKey(PublicKey publicKey, PrivateKey privateKey) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
     }
 
     public interface Factory {
 
-        public static AsymmetricKey asymmetricKey(ByteArray publicKey, ByteArray privateKey) {
+        public static AsymmetricKey asymmetricKey(PublicKey publicKey, PrivateKey privateKey) {
             return new AsymmetricKey(publicKey, privateKey);
         }
     }
 
-    public final ByteArray publicKey() {
+    public final PublicKey publicKey() {
         return publicKey;
     }
 
-    public final AsymmetricKey withPublicKey(ByteArray publicKey) {
+    public final AsymmetricKey withPublicKey(PublicKey publicKey) {
         return new AsymmetricKey(publicKey, privateKey);
     }
 
-    public final ByteArray privateKey() {
+    public final PrivateKey privateKey() {
         return privateKey;
     }
 
-    public final AsymmetricKey withPrivateKey(ByteArray privateKey) {
+    public final AsymmetricKey withPrivateKey(PrivateKey privateKey) {
         return new AsymmetricKey(publicKey, privateKey);
     }
 
@@ -71,24 +69,24 @@ public final class AsymmetricKey {
 
     public static final class Builder {
 
-        public ByteArray publicKey;
+        public PublicKey publicKey;
 
-        public ByteArray privateKey;
+        public PrivateKey privateKey;
 
-        public final ByteArray publicKey() {
+        public final PublicKey publicKey() {
             return publicKey;
         }
 
-        public final Builder publicKey(ByteArray publicKey) {
+        public final Builder publicKey(PublicKey publicKey) {
             this.publicKey = publicKey;
             return this;
         }
 
-        public final ByteArray privateKey() {
+        public final PrivateKey privateKey() {
             return privateKey;
         }
 
-        public final Builder privateKey(ByteArray privateKey) {
+        public final Builder privateKey(PrivateKey privateKey) {
             this.privateKey = privateKey;
             return this;
         }
