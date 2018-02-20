@@ -50,8 +50,8 @@ public final class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public synchronized void accept(Event event) { //TODO How to thread-safety?
-    	// Check the event validity
+    public void accept(Event event) { //TODO How to thread-safety?
+    	//TODO Check the event validity
     	Event.visit(event, new Event.Visitor<Void>() {
     		private void add(Account account, Tx tx) {
     	    	Chain chain = chains.get(account);
