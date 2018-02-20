@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -20,6 +21,18 @@ public final class AsymmetricKeys {
 	public static final SecureRandom RANDOM = new SecureRandom();
 	
 	private AsymmetricKeys() {
+	}
+	
+	public static ByteArray hash(ByteBuffer buffer) {
+		ByteBuffer b = buffer.duplicate();
+
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256", "BC");
+			digest.update(b.array(), b.position(), b.remaining());
+			return new ByteArray(digest.digest());
+		} catch (Exception e) {
+			throw new CryptoException(e);
+		}
 	}
 
 	public static AsymmetricKey generate() {
