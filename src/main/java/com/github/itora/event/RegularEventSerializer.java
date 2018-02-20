@@ -119,7 +119,6 @@ public final class RegularEventSerializer implements EventSerializer {
     			return build(
     				EventKind.OPEN,
 					new ByteArrayToByteBuffer(event.account().key().value()),
-					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
@@ -130,7 +129,6 @@ public final class RegularEventSerializer implements EventSerializer {
     				EventKind.RECEIVE,
 					new ByteArrayToByteBuffer(event.previous().id()),
 					new ByteArrayToByteBuffer(event.source().id()),
-					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
@@ -143,7 +141,6 @@ public final class RegularEventSerializer implements EventSerializer {
 					new ByteArrayToByteBuffer(event.from().key().value()),
 					new ByteArrayToByteBuffer(event.to().key().value()),
 					new LongToByteBuffer(event.amount().value()),
-					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
@@ -163,28 +160,25 @@ public final class RegularEventSerializer implements EventSerializer {
 		switch (EventKind.parse(buffer)) {
 		case OPEN: {
 			Account account = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
-			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.openEvent(account, pow, timestamp, signature);
+			return Event.Factory.openEvent(account, pow, timestamp);
 		}
 		case RECEIVE: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
 			TxId source = TxId.Factory.txId(byteArrayFrom(buffer));
-			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.receiveEvent(previous, source, pow, timestamp, signature);
+			return Event.Factory.receiveEvent(previous, source, pow, timestamp);
 		}
 		case SEND: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
 			Account from = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			Account to = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			Amount amount = Amount.Factory.amount(buffer.getLong());
-			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.sendEvent(previous, from, to, amount, pow, timestamp, signature);
+			return Event.Factory.sendEvent(previous, from, to, amount, pow, timestamp);
 		}
 		default: {
 			// Impossible case

@@ -38,11 +38,11 @@ public class EventSerializerImplTest {
         Account accountEN = Account.Factory.account(keyEN.publicKey());
         Account accountS = Account.Factory.account(keyS.publicKey());
 
-        OpenEvent open = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH, 0L);
+        OpenEvent open = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH);
         SendEvent send = Event.Factory.sendEvent(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
-                Instant.EPOCH.plusSeconds(200_000L), 0L);
+                Instant.EPOCH.plusSeconds(200_000L));
         ReceiveEvent receive = Event.Factory.receiveEvent(TxIds.txId(open), TxIds.txId(send),
-                0L, Instant.EPOCH.plusSeconds(300_000L), 0L);
+                0L, Instant.EPOCH.plusSeconds(300_000L));
         
         shouldSerializeDeserialize(open);
         shouldSerializeDeserialize(send);
