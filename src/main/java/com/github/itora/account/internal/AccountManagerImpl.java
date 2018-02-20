@@ -13,7 +13,6 @@ import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
 import com.github.itora.chain.Lattice;
 import com.github.itora.chain.Lattices;
-import com.github.itora.crypto.Signature;
 import com.github.itora.event.Event;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
@@ -96,7 +95,7 @@ public final class AccountManagerImpl implements AccountManager {
 
             @Override
             public Lattice visitReceiveEvent(ReceiveEvent event) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.signature, event.previous);
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.previous);
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
@@ -116,7 +115,7 @@ public final class AccountManagerImpl implements AccountManager {
 
             @Override
             public Lattice visitSendEvent(SendEvent event) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.signature, event.previous);
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.previous);
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
@@ -173,7 +172,7 @@ public final class AccountManagerImpl implements AccountManager {
         return amount;
     }
 
-    private static BlockValiditation checkBlockValidity(Lattice lattice, Signature signature, TxId previous) {
+    private static BlockValiditation checkBlockValidity(Lattice lattice, TxId previous) {
         Block previousBlock = findBlock(lattice, previous);
 
         if (previousBlock == null) {
