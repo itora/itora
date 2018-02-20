@@ -8,8 +8,7 @@ public final class Chains {
 	private Chains() {
 	}
 	
-	// TODO fixme
-	public static final Chain ROOT = Chain.Factory.chain(null, null);
+	public static final Chain ROOT = Chain.Factory.chainRoot();
 	
 	public static Iterable<Tx> iterate(Chain chain) {
 		return new Iterable<Tx>() {
@@ -23,9 +22,21 @@ public final class Chains {
 					}
 					@Override
 					public Tx next() {
-						Tx tx = next.tx;
-						next = next.previous;
-						return tx;
+					    return Chain.visit(next, new Chain.Visitor<Tx>() {
+
+                            @Override
+                            public Tx visitChainRoot(ChainRoot chainRoot) {
+                             throw new IllegalStateException("Cannot get Tx on the ChainRoot");
+                            }
+
+                            @Override
+                            public Tx visitChainLink(ChainLink link) {
+                                Tx tx = link.tx;
+                                next = link.previous;
+                                return tx;
+                            }
+                        });
+					
 					}
 				};
 			}
