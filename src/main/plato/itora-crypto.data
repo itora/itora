@@ -14,4 +14,8 @@ type PrivateKey {
     val value: ByteBuffer
 }
 
+type AsymetricKey {
+	var publicKey: PublicKey
+	var privateKey: PrivateKey
+}
 
