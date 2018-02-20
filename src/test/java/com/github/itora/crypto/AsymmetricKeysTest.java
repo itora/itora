@@ -15,7 +15,11 @@ public class AsymmetricKeysTest {
     	AsymmetricKeys.RANDOM.nextBytes(randomBuffer);
     	Signature signature = AsymmetricKeys.sign(ByteBuffer.wrap(randomBuffer), asymmetricKey.privateKey());
     	System.out.println(signature);
-    	Assertions.assertThat(AsymmetricKeys.verify(signature, ByteBuffer.wrap(randomBuffer), asymmetricKey.publicKey())).isTrue();
+    	try {
+    		AsymmetricKeys.verify(signature, ByteBuffer.wrap(randomBuffer), asymmetricKey.publicKey());
+    	} catch (CryptoException e) {
+        	Assertions.fail("Fail", e);
+    	}
     }
 
 }
