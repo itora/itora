@@ -14,7 +14,6 @@ public final class SecureAccountManagerImpl implements SecureEventHandler {
 
     @Override
     public void accept(SignedEvent signedEvent) {
-        
         eventHandler.accept(signedEvent.event());
     }
 
