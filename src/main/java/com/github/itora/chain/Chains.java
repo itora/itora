@@ -1,4 +1,4 @@
-package com.github.itora.account;
+package com.github.itora.chain;
 
 import java.util.Iterator;
 
@@ -8,6 +8,9 @@ public final class Chains {
 	private Chains() {
 	}
 	
+	// TODO fixme
+	public static final Chain ROOT = Chain.Factory.chain(null, null);
+	
 	public static Iterable<Tx> iterate(Chain chain) {
 		return new Iterable<Tx>() {
 			@Override
@@ -16,7 +19,7 @@ public final class Chains {
 					private Chain next = chain;
 					@Override
 					public boolean hasNext() {
-						return (next != null);
+						return (!next.equals(Chains.ROOT));
 					}
 					@Override
 					public Tx next() {

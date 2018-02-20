@@ -46,6 +46,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.andrewoma.dexx</groupId>
+			<artifactId>collection</artifactId>
+			<version>0.7</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>

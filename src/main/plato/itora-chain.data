@@ -1,0 +1,14 @@
+model com.github.itora.chain
+
+import java:com.github.andrewoma.dexx.collection#Map
+import java:com.github.itora.tx#Tx
+import java:com.github.itora.account#Account
+
+type Lattice {
+    val chains: Map[Account, Chain]
+}
+
+type Chain {
+    val previous: Chain
+    val tx: Tx
+}

@@ -1,9 +1,8 @@
 package com.github.itora.event;
 
-import java.time.Instant;
-
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
+import java.time.Instant;
 import com.github.itora.tx.TxId;
 
 public final class SendEvent extends Event {

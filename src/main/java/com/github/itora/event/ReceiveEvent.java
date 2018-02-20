@@ -1,7 +1,6 @@
 package com.github.itora.event;
 
 import java.time.Instant;
-
 import com.github.itora.tx.TxId;
 
 public final class ReceiveEvent extends Event {
