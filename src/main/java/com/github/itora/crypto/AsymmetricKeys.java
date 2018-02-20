@@ -2,6 +2,7 @@ package com.github.itora.crypto;
 
 import java.nio.ByteBuffer;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -15,7 +16,8 @@ public final class AsymmetricKeys {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 	}
 
-	private static final SecureRandom RANDOM = new SecureRandom();
+	// Allegedly thread-safe
+	public static final SecureRandom RANDOM = new SecureRandom();
 	
 	private AsymmetricKeys() {
 	}
@@ -24,8 +26,9 @@ public final class AsymmetricKeys {
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
 			gen.initialize(512, RANDOM);
-			byte[] publicKey = gen.genKeyPair().getPublic().getEncoded();
-			byte[] privateKey = gen.genKeyPair().getPrivate().getEncoded();
+			KeyPair keyPair = gen.genKeyPair();
+			byte[] publicKey = keyPair.getPublic().getEncoded();
+			byte[] privateKey = keyPair.getPrivate().getEncoded();
 			return new AsymmetricKey(new PublicKey(new ByteArray(publicKey)), new PrivateKey(new ByteArray(privateKey)));
 		} catch (Exception e) {
 			throw new CryptoException(e);
@@ -36,13 +39,14 @@ public final class AsymmetricKeys {
 		ByteBuffer b = buffer.duplicate();
 
 		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 			java.security.PrivateKey k = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKey.value.bytes));
 
 			java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");
 			s.initSign(k, RANDOM);
 	
 			s.update(b);
+
 			return new Signature(new ByteArray(s.sign()));
 		} catch (Exception e) {
 			throw new CryptoException(e);
@@ -53,7 +57,7 @@ public final class AsymmetricKeys {
 		ByteBuffer b = buffer.duplicate();
 
 		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 			java.security.PublicKey k = keyFactory.generatePublic(new X509EncodedKeySpec(publicKey.value().bytes));
 	
 			java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");
