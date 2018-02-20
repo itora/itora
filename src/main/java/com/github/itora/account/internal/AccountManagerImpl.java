@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
+import com.github.itora.account.internal.BlockValiditation.Status;
 import com.github.itora.amount.Amount;
 import com.github.itora.amount.Amounts;
 import com.github.itora.bootstrap.LatticeBootstrap;
@@ -12,6 +13,7 @@ import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
 import com.github.itora.chain.Lattice;
 import com.github.itora.chain.Lattices;
+import com.github.itora.crypto.Signature;
 import com.github.itora.event.Event;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
@@ -94,14 +96,13 @@ public final class AccountManagerImpl implements AccountManager {
 
             @Override
             public Lattice visitReceiveEvent(ReceiveEvent event) {
-                Block previousBlock = checkBlockValidity(lattice, event.signature, event.previous);
-                TxId txId = TxIds.txId(event);
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.signature, event.previous);
 
-                // Check if this block was already processed!
-                Block thisBlock = findBlock(lattice, txId);
-                if (thisBlock != null) {
-                    return lattice;
+                if (previousBlockValidation.status != Status.ACCEPTED) {
+                    System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
                 }
+                Block previousBlock = previousBlockValidation.block;
+                TxId txId = TxIds.txId(event);
 
                 TxId sourceTxId = event.source();
 
@@ -113,28 +114,15 @@ public final class AccountManagerImpl implements AccountManager {
                 return add(previousBlock.account, previous, tx);
             }
 
-            private Block checkBlockValidity(Lattice lattice, long signature, TxId previous) {
-                Block previousBlock = findBlock(lattice, previous);
-                
-                if (previousBlock == null) {
-                    // Dangling block?!
-                }
-
-                if (!Chains.isHead(previousBlock.txId, previousBlock.chain)) {
-                    // 
-                }
-                return previousBlock;
-            }
-
             @Override
             public Lattice visitSendEvent(SendEvent event) {
-                TxId txId = TxIds.txId(event);
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.signature, event.previous);
 
-                // Check if this block was already processed!
-                Block thisBlock = findBlock(lattice, txId);
-                if (thisBlock != null) {
-                    return lattice;
+                if (previousBlockValidation.status != Status.ACCEPTED) {
+                    System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
                 }
+
+                TxId txId = TxIds.txId(event);
 
                 Account account = event.from();
 
@@ -185,6 +173,20 @@ public final class AccountManagerImpl implements AccountManager {
         return amount;
     }
 
+    private static BlockValiditation checkBlockValidity(Lattice lattice, Signature signature, TxId previous) {
+        Block previousBlock = findBlock(lattice, previous);
+
+        if (previousBlock == null) {
+            // Dangling block?!
+            return BlockValiditation.DANGLING;
+        }
+
+        if (!Chains.isHead(previousBlock.txId, previousBlock.chain)) {
+            return BlockValiditation.forked(previousBlock);
+        }
+        return BlockValiditation.accepted(previousBlock);
+    }
+
     private static Block findBlock(Lattice lattice, TxId txId) {
         Tx foundTx = null;
         Account foundAccount = null;
@@ -221,4 +223,33 @@ final class Block {
         this.tx = tx;
         this.txId = txId;
     }
+}
+
+final class BlockValiditation {
+    public static final BlockValiditation DANGLING = new BlockValiditation(Status.DANGLING, null);
+
+    public enum Status {
+        ACCEPTED, DANGLING, FORKED
+    }
+
+    public final Status status;
+    public final Block block;
+
+    public BlockValiditation(Status status, Block block) {
+        this.status = status;
+        this.block = block;
+    }
+
+    public static BlockValiditation dangling() {
+        return DANGLING;
+    }
+
+    public static BlockValiditation forked(Block block) {
+        return new BlockValiditation(Status.FORKED, block);
+    }
+
+    public static BlockValiditation accepted(Block block) {
+        return new BlockValiditation(Status.ACCEPTED, block);
+    }
+
 }
