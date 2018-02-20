@@ -99,7 +99,9 @@ public final class AccountManagerImpl implements AccountManager {
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
+                    return lattice;
                 }
+                
                 Block previousBlock = previousBlockValidation.block;
                 TxId txId = TxIds.txId(event);
 
@@ -119,6 +121,7 @@ public final class AccountManagerImpl implements AccountManager {
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
+                    return lattice;
                 }
 
                 TxId txId = TxIds.txId(event);
