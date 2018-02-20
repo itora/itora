@@ -1,4 +1,4 @@
-package com.github.itora.event.internal;
+package com.github.itora.event;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -6,19 +6,13 @@ import java.time.Instant;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.PublicKey;
-import com.github.itora.event.Event;
-import com.github.itora.event.EventSerializer;
-import com.github.itora.event.OpenEvent;
-import com.github.itora.event.ReceiveEvent;
-import com.github.itora.event.SendEvent;
-import com.github.itora.event.SerializationException;
 import com.github.itora.tx.TxId;
 import com.github.itora.util.ByteArray;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
-public final class EventSerializerImpl implements EventSerializer {
-	public EventSerializerImpl() {
+public final class RegularEventSerializer implements EventSerializer {
+	public RegularEventSerializer() {
 	}
 	
 	private static interface ToByteBuffer {
@@ -73,19 +67,19 @@ public final class EventSerializerImpl implements EventSerializer {
 			buffer.putLong(value);
 		}
 	}
-	private static final class PublicKeyToByteBuffer implements ToByteBuffer {
-		private final PublicKey value;
-		public PublicKeyToByteBuffer(PublicKey value) {
+	private static final class ByteArrayToByteBuffer implements ToByteBuffer {
+		private final ByteArray value;
+		public ByteArrayToByteBuffer(ByteArray value) {
 			this.value = value;
 		}
 		@Override
 		public int size() {
-			return Ints.BYTES + value.value.bytes.length;
+			return Ints.BYTES + value.bytes.length;
 		}
 		@Override
 		public void appendTo(ByteBuffer buffer) {
-			buffer.putInt(value.value.bytes.length); //TODO Optimize size
-			buffer.put(value.value.bytes);
+			buffer.putInt(value.bytes.length); //TODO Optimize size
+			buffer.put(value.bytes);
 		}
 	}
 	private static final class InstantToByteBuffer implements ToByteBuffer {
@@ -124,7 +118,7 @@ public final class EventSerializerImpl implements EventSerializer {
     		public ByteBuffer visitOpenEvent(OpenEvent event) {
     			return build(
     				EventKind.OPEN,
-					new PublicKeyToByteBuffer(event.account().key()),
+					new ByteArrayToByteBuffer(event.account().key().value()),
 					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
@@ -134,8 +128,8 @@ public final class EventSerializerImpl implements EventSerializer {
     		public ByteBuffer visitReceiveEvent(ReceiveEvent event) {
     			return build(
     				EventKind.RECEIVE,
-					new LongToByteBuffer(event.previous().id()),
-					new LongToByteBuffer(event.source().id()),
+					new ByteArrayToByteBuffer(event.previous().id()),
+					new ByteArrayToByteBuffer(event.source().id()),
 					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
@@ -145,9 +139,9 @@ public final class EventSerializerImpl implements EventSerializer {
     		public ByteBuffer visitSendEvent(SendEvent event) {
     			return build(
     				EventKind.SEND,
-					new LongToByteBuffer(event.previous().id()),
-					new PublicKeyToByteBuffer(event.from().key()),
-					new PublicKeyToByteBuffer(event.to().key()),
+					new ByteArrayToByteBuffer(event.previous().id()),
+					new ByteArrayToByteBuffer(event.from().key().value()),
+					new ByteArrayToByteBuffer(event.to().key().value()),
 					new LongToByteBuffer(event.amount().value()),
 					new LongToByteBuffer(event.signature()),
 					new LongToByteBuffer(event.pow()),
@@ -157,35 +151,35 @@ public final class EventSerializerImpl implements EventSerializer {
     	});
 	}
 	
-	private static Account accountFrom(ByteBuffer buffer) {
+	private static ByteArray byteArrayFrom(ByteBuffer buffer) {
 		int size = buffer.getInt();
 		byte[] bytes = new byte[size]; //TODO Verif too big sizes
 		buffer.get(bytes);
-		return Account.Factory.account(PublicKey.Factory.publicKey(new ByteArray(bytes)));
+		return new ByteArray(bytes);
 	}
 	
 	@Override
 	public Event deserialize(ByteBuffer buffer) {
 		switch (EventKind.parse(buffer)) {
 		case OPEN: {
-			Account account = accountFrom(buffer);
+			Account account = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
 			return Event.Factory.openEvent(account, pow, timestamp, signature);
 		}
 		case RECEIVE: {
-			TxId previous = TxId.Factory.txId(buffer.getLong());
-			TxId source = TxId.Factory.txId(buffer.getLong());
+			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
+			TxId source = TxId.Factory.txId(byteArrayFrom(buffer));
 			long signature = buffer.getLong();
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
 			return Event.Factory.receiveEvent(previous, source, pow, timestamp, signature);
 		}
 		case SEND: {
-			TxId previous = TxId.Factory.txId(buffer.getLong());
-			Account from = accountFrom(buffer);
-			Account to = accountFrom(buffer);
+			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
+			Account from = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
+			Account to = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			Amount amount = Amount.Factory.amount(buffer.getLong());
 			long signature = buffer.getLong();
 			long pow = buffer.getLong();

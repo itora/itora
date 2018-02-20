@@ -3,9 +3,10 @@ model com.github.itora.tx
 import java:java.time#Instant 
 import java:com.github.itora.account#Account
 import java:com.github.itora.amount#Amount
+import java:com.github.itora.util#ByteArray
 
 type TxId {
-  val id: long 
+  val id: ByteArray 
 }
 
 type Tx = OpenTx | SendTx | ReceiveTx

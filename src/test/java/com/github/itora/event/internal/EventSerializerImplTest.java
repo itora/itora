@@ -7,6 +7,7 @@ import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
 import com.github.itora.crypto.AsymmetricKeys;
 import com.github.itora.event.Event;
+import com.github.itora.event.RegularEventSerializer;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
 import com.github.itora.event.SendEvent;
@@ -18,11 +19,11 @@ import org.junit.Test;
 
 public class EventSerializerImplTest {
 
-    private EventSerializerImpl eventSerializer;
+    private RegularEventSerializer eventSerializer;
 
     @Before
     public void setUp() throws Exception {
-    	eventSerializer = new EventSerializerImpl();
+    	eventSerializer = new RegularEventSerializer();
     }
 
     private void shouldSerializeDeserialize(Event event) {

@@ -1,25 +1,27 @@
 package com.github.itora.tx;
 
+import com.github.itora.util.ByteArray;
+
 public final class TxId {
 
-    public final long id;
+    public final ByteArray id;
 
-    public TxId(long id) {
+    public TxId(ByteArray id) {
         this.id = id;
     }
 
     public interface Factory {
 
-        public static TxId txId(long id) {
+        public static TxId txId(ByteArray id) {
             return new TxId(id);
         }
     }
 
-    public final long id() {
+    public final ByteArray id() {
         return id;
     }
 
-    public final TxId withId(long id) {
+    public final TxId withId(ByteArray id) {
         return new TxId(id);
     }
 
@@ -58,13 +60,13 @@ public final class TxId {
 
     public static final class Builder {
 
-        public long id;
+        public ByteArray id;
 
-        public final long id() {
+        public final ByteArray id() {
             return id;
         }
 
-        public final Builder id(long id) {
+        public final Builder id(ByteArray id) {
             this.id = id;
             return this;
         }
