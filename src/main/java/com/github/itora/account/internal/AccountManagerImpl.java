@@ -23,14 +23,14 @@ import com.google.common.collect.Maps;
 
 public final class AccountManagerImpl implements AccountManager {
 
-	private final Map<Account, Chain> personalChains = Maps.newHashMap();
+	private final Map<Account, Chain> chains = Maps.newHashMap();
 	
 	public AccountManagerImpl() {
 	}
 	
     public Amount balance(Account account) {
     	Amount sum = Amounts.ZERO;
-    	for (Tx tx : Chains.iterate(personalChains.get(account))) {
+    	for (Tx tx : Chains.iterate(chains.get(account))) {
         	sum = Amounts.plus(sum, Tx.visit(tx, new Tx.Visitor<Amount>() {
         		@Override
         		public Amount visitOpenTx(OpenTx tx) {
@@ -50,12 +50,12 @@ public final class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public void accept(Event event) {
+    public synchronized void accept(Event event) { //TODO How to thread-safety?
     	// Check the event validity
     	Event.visit(event, new Event.Visitor<Void>() {
     		private void add(Account account, Tx tx) {
-    	    	Chain personalChain = personalChains.get(account);
-    	    	personalChains.put(account, new Chain(personalChain, tx));
+    	    	Chain chain = chains.get(account);
+    	    	chains.put(account, new Chain(chain, tx));
     		}
     		@Override
     		public Void visitOpenEvent(OpenEvent event) {
@@ -69,7 +69,7 @@ public final class AccountManagerImpl implements AccountManager {
     			TxId sourceTxId = event.source();
     		
     			Account account = null;
-    			for (Map.Entry<Account, Chain> entry : personalChains.entrySet()) {
+    			for (Map.Entry<Account, Chain> entry : chains.entrySet()) {
         	    	for (Tx tx : Chains.iterate(entry.getValue())) {
         	    		if (event.previous.equals(tx.txId())) {
         	    			account = entry.getKey();
@@ -83,7 +83,7 @@ public final class AccountManagerImpl implements AccountManager {
     			}
     			
     			Amount amount = null;
-    			for (Map.Entry<Account, Chain> entry : personalChains.entrySet()) {
+    			for (Map.Entry<Account, Chain> entry : chains.entrySet()) {
         	    	for (Tx tx : Chains.iterate(entry.getValue())) {
         	    		if (sourceTxId.equals(tx.txId())) {
         	    			Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
