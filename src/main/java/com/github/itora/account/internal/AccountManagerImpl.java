@@ -7,6 +7,7 @@ import com.github.itora.account.Account;
 import com.github.itora.account.AccountManager;
 import com.github.itora.amount.Amount;
 import com.github.itora.amount.Amounts;
+import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
 import com.github.itora.chain.Lattice;
@@ -26,7 +27,8 @@ public final class AccountManagerImpl implements AccountManager {
 
     private final AtomicReference<Lattice> lattice = new AtomicReference<>(Lattices.EMPTY);
 
-    public AccountManagerImpl() {
+    public AccountManagerImpl(LatticeBootstrap latticeBootstrap) {
+        lattice.set(latticeBootstrap.bootstrap());
     }
 
     public Amount balance(Account account) {

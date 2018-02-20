@@ -4,6 +4,9 @@ import java.time.Instant;
 
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
+import com.github.itora.bootstrap.LatticeBootstrap;
+import com.github.itora.crypto.AsymmetricKey;
+import com.github.itora.crypto.AsymmetricKeys;
 import com.github.itora.event.Event;
 import com.github.itora.event.OpenEvent;
 import com.github.itora.event.ReceiveEvent;
@@ -20,14 +23,18 @@ public class AccountManagerImplTest {
 
     @Before
     public void setUp() throws Exception {
-        accountManager = new AccountManagerImpl();
+        accountManager = new AccountManagerImpl(LatticeBootstrap.EMPTY);
     }
 
     @Test
     public void shouldPlayScenario1() {
-        Account accountEN = Account.Factory.account(0L);
-        Account accountS = Account.Factory.account(1L);
-        Account accountD = Account.Factory.account(2L);
+        AsymmetricKey keyEN = AsymmetricKeys.generate();
+        AsymmetricKey keyS = AsymmetricKeys.generate();
+        AsymmetricKey keyD = AsymmetricKeys.generate();
+
+        Account accountEN = Account.Factory.account(keyEN.publicKey());
+        Account accountS = Account.Factory.account(keyS.publicKey());
+        Account accountD = Account.Factory.account(keyD.publicKey());
 
         OpenEvent openEN = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH, 0L);
         OpenEvent openS = Event.Factory.openEvent(accountS, 0L, Instant.EPOCH, 0L);
@@ -52,7 +59,7 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD), 
+        ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD),
                 0L, Instant.EPOCH.plusSeconds(500_000L), 0L);
 
         accountManager.accept(receiveDfromS);
