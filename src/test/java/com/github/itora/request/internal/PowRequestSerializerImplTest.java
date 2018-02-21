@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
-import com.github.itora.crypto.AsymmetricKeys;
+import com.github.itora.crypto.Cryptos;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.PowRequest;
 import com.github.itora.request.ReceiveRequest;
@@ -30,7 +30,7 @@ public class PowRequestSerializerImplTest {
 	}
 
 	private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
-		ByteArray pow = AsymmetricKeys.random(100);
+		ByteArray pow = Cryptos.random(100);
 		PowRequest pr = PowRequest.Factory.powRequest(request, pow);
 		PowRequest result = requestSerializer.deserialize(requestSerializer.serialize(pr));
 		Assertions.assertThat(result).isEqualTo(pr);
@@ -38,8 +38,8 @@ public class PowRequestSerializerImplTest {
 
 	@Test
 	public void shouldSerializeDeserialize() {
-		AsymmetricKey keyEN = AsymmetricKeys.generate();
-		AsymmetricKey keyS = AsymmetricKeys.generate();
+		AsymmetricKey keyEN = Cryptos.generate();
+		AsymmetricKey keyS = Cryptos.generate();
 
 		Account accountEN = Account.Factory.account(keyEN.publicKey());
 		Account accountS = Account.Factory.account(keyS.publicKey());

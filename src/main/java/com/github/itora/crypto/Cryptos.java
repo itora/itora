@@ -12,7 +12,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 import com.github.itora.util.ByteArray;
 
-public final class AsymmetricKeys {
+public final class Cryptos {
     static {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
@@ -20,7 +20,7 @@ public final class AsymmetricKeys {
     // Allegedly thread-safe
     public static final SecureRandom RANDOM = new SecureRandom();
 
-    private AsymmetricKeys() {
+    private Cryptos() {
     }
 
     public static ByteArray random(int size) {
