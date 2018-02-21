@@ -6,8 +6,8 @@ import com.github.itora.crypto.Signature;
 import com.github.itora.util.ByteArray;
 import com.google.common.primitives.Ints;
 
-public final class RegularSignedRequestSerializer implements SignedRequestSerializer {
-	public RegularSignedRequestSerializer() {
+public final class RegularSignedPowRequestSerializer implements SignedPowRequestSerializer {
+	public RegularSignedPowRequestSerializer() {
 	}
 	
 	private static interface ToByteBuffer {
@@ -76,8 +76,8 @@ public final class RegularSignedRequestSerializer implements SignedRequestSerial
 	}
 	
 	@Override
-	public SignedRequest deserialize(ByteBuffer buffer) {
-		return SignedRequest.Factory.signedRequest(
+	public SignedPowRequest deserialize(ByteBuffer buffer) {
+		return SignedPowRequest.Factory.signedPowRequest(
 			new RegularRequestSerializer().deserialize(buffer),
 			Signature.Factory.signature(byteArrayFrom(buffer))
 		);

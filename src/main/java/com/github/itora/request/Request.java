@@ -13,16 +13,16 @@ public abstract class Request {
 
     public interface Factory {
 
-        public static OpenRequest openRequest(Account account, long pow, Instant timestamp) {
-            return new OpenRequest(account, pow, timestamp);
+        public static OpenRequest openRequest(Account account, Instant timestamp) {
+            return new OpenRequest(account, timestamp);
         }
 
-        public static SendRequest sendRequest(TxId previous, Account from, Account to, Amount amount, long pow, Instant timestamp) {
-            return new SendRequest(previous, from, to, amount, pow, timestamp);
+        public static SendRequest sendRequest(TxId previous, Account from, Account to, Amount amount, Instant timestamp) {
+            return new SendRequest(previous, from, to, amount, timestamp);
         }
 
-        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, long pow, Instant timestamp) {
-            return new ReceiveRequest(previous, source, pow, timestamp);
+        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
+            return new ReceiveRequest(previous, source, timestamp);
         }
     }
 
@@ -31,10 +31,6 @@ public abstract class Request {
     }
 
     abstract <R> R visit(Request.Visitor<R> visitor);
-
-    public abstract long pow();
-
-    public abstract Request withPow(long pow);
 
     public abstract Instant timestamp();
 

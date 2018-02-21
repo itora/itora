@@ -10,21 +10,18 @@ public final class ReceiveRequest extends Request {
 
     public final AccountTxId source;
 
-    public final long pow;
-
     public final Instant timestamp;
 
-    public ReceiveRequest(TxId previous, AccountTxId source, long pow, Instant timestamp) {
+    public ReceiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
         this.previous = previous;
         this.source = source;
-        this.pow = pow;
         this.timestamp = timestamp;
     }
 
     public interface Factory {
 
-        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, long pow, Instant timestamp) {
-            return new ReceiveRequest(previous, source, pow, timestamp);
+        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
+            return new ReceiveRequest(previous, source, timestamp);
         }
     }
 
@@ -38,7 +35,7 @@ public final class ReceiveRequest extends Request {
     }
 
     public final ReceiveRequest withPrevious(TxId previous) {
-        return new ReceiveRequest(previous, source, pow, timestamp);
+        return new ReceiveRequest(previous, source, timestamp);
     }
 
     public final AccountTxId source() {
@@ -46,17 +43,7 @@ public final class ReceiveRequest extends Request {
     }
 
     public final ReceiveRequest withSource(AccountTxId source) {
-        return new ReceiveRequest(previous, source, pow, timestamp);
-    }
-
-    @Override
-    public final long pow() {
-        return pow;
-    }
-
-    @Override
-    public final ReceiveRequest withPow(long pow) {
-        return new ReceiveRequest(previous, source, pow, timestamp);
+        return new ReceiveRequest(previous, source, timestamp);
     }
 
     @Override
@@ -66,7 +53,7 @@ public final class ReceiveRequest extends Request {
 
     @Override
     public final ReceiveRequest withTimestamp(Instant timestamp) {
-        return new ReceiveRequest(previous, source, pow, timestamp);
+        return new ReceiveRequest(previous, source, timestamp);
     }
 
     public static Builder builder() {
@@ -74,7 +61,7 @@ public final class ReceiveRequest extends Request {
     }
 
     public final Builder toBuilder() {
-        return ReceiveRequest.builder().previous(previous).source(source).pow(pow).timestamp(timestamp);
+        return ReceiveRequest.builder().previous(previous).source(source).timestamp(timestamp);
     }
 
     @Override
@@ -89,17 +76,17 @@ public final class ReceiveRequest extends Request {
             return false;
         }
         ReceiveRequest that = (ReceiveRequest) o;
-        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
+        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(previous, source, pow, timestamp);
+        return java.util.Objects.hash(previous, source, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "ReceiveRequest{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+        return "ReceiveRequest{previous = " + this.previous + ", source = " + this.source + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
@@ -107,8 +94,6 @@ public final class ReceiveRequest extends Request {
         public TxId previous;
 
         public AccountTxId source;
-
-        public long pow;
 
         public Instant timestamp;
 
@@ -130,15 +115,6 @@ public final class ReceiveRequest extends Request {
             return this;
         }
 
-        public final long pow() {
-            return pow;
-        }
-
-        public final Builder pow(long pow) {
-            this.pow = pow;
-            return this;
-        }
-
         public final Instant timestamp() {
             return timestamp;
         }
@@ -149,7 +125,7 @@ public final class ReceiveRequest extends Request {
         }
 
         public final ReceiveRequest build() {
-            return new ReceiveRequest(previous, source, pow, timestamp);
+            return new ReceiveRequest(previous, source, timestamp);
         }
 
         @Override
@@ -164,17 +140,17 @@ public final class ReceiveRequest extends Request {
                 return false;
             }
             ReceiveRequest.Builder that = (ReceiveRequest.Builder) o;
-            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
+            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(previous, source, pow, timestamp);
+            return java.util.Objects.hash(previous, source, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "ReceiveRequest.Builder{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+            return "ReceiveRequest.Builder{previous = " + this.previous + ", source = " + this.source + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

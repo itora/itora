@@ -24,7 +24,7 @@ public class RequestSerializerImplTest {
 
     @Before
     public void setUp() throws Exception {
-    	requestSerializer = new RegularRequestSerializer();
+        requestSerializer = new RegularRequestSerializer();
     }
 
     private void shouldSerializeDeserialize(Request request) {
@@ -39,13 +39,13 @@ public class RequestSerializerImplTest {
         Account accountEN = Account.Factory.account(keyEN.publicKey());
         Account accountS = Account.Factory.account(keyS.publicKey());
 
-        OpenRequest open = Request.Factory.openRequest(accountEN, 0L, Instant.EPOCH);
-        SendRequest send = Request.Factory.sendRequest(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
+        OpenRequest open = Request.Factory.openRequest(accountEN, Instant.EPOCH);
+        SendRequest send = Request.Factory.sendRequest(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L),
                 Instant.EPOCH.plusSeconds(200_000L));
         ReceiveRequest receive = Request.Factory.receiveRequest(TxIds.txId(open),
                 AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(send)),
-                0L, Instant.EPOCH.plusSeconds(300_000L));
-        
+                Instant.EPOCH.plusSeconds(300_000L));
+
         shouldSerializeDeserialize(open);
         shouldSerializeDeserialize(send);
         shouldSerializeDeserialize(receive);

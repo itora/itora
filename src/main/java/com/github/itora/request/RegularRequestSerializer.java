@@ -120,7 +120,6 @@ public final class RegularRequestSerializer implements RequestSerializer {
     			return build(
     				EventKind.OPEN,
 					new ByteArrayToByteBuffer(request.account().key().value()),
-					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
     		}
@@ -131,7 +130,6 @@ public final class RegularRequestSerializer implements RequestSerializer {
 					new ByteArrayToByteBuffer(request.previous().id()),
 	                new ByteArrayToByteBuffer(request.source.account().key().value()),
 					new ByteArrayToByteBuffer(request.source().txId().id()),
-					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
     		}
@@ -143,7 +141,6 @@ public final class RegularRequestSerializer implements RequestSerializer {
 					new ByteArrayToByteBuffer(request.from().key().value()),
 					new ByteArrayToByteBuffer(request.to().key().value()),
 					new LongToByteBuffer(request.amount().value()),
-					new LongToByteBuffer(request.pow()),
 					new InstantToByteBuffer(request.timestamp())
     			);
     		}
@@ -162,27 +159,24 @@ public final class RegularRequestSerializer implements RequestSerializer {
 		switch (EventKind.parse(buffer)) {
 		case OPEN: {
 			Account account = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
-			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Request.Factory.openRequest(account, pow, timestamp);
+			return Request.Factory.openRequest(account, timestamp);
 		}
 		case RECEIVE: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
 	        Account sourceAccount = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			TxId sourceTxId = TxId.Factory.txId(byteArrayFrom(buffer));
 	        AccountTxId source = AccountTxId.Factory.accountTxId(sourceAccount, sourceTxId);
-			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-            return Request.Factory.receiveRequest(previous, source, pow, timestamp);
+            return Request.Factory.receiveRequest(previous, source, timestamp);
 		}
 		case SEND: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
 			Account from = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			Account to = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			Amount amount = Amount.Factory.amount(buffer.getLong());
-			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Request.Factory.sendRequest(previous, from, to, amount, pow, timestamp);
+			return Request.Factory.sendRequest(previous, from, to, amount, timestamp);
 		}
 		default: {
 			// Impossible case

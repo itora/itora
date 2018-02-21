@@ -6,6 +6,7 @@ import java:com.github.itora.tx#TxId
 import java:com.github.itora.account#Account
 import java:com.github.itora.amount#Amount
 import java:com.github.itora.crypto#Signature
+import java:com.github.itora.util#ByteArray
 
 
 type Request = OpenRequest | SendRequest | ReceiveRequest
@@ -13,7 +14,6 @@ type Request = OpenRequest | SendRequest | ReceiveRequest
 
 type OpenRequest {
     val account: Account
-    val pow: long
     val timestamp: Instant
 }
 
@@ -22,20 +22,24 @@ type SendRequest {
     val from: Account
     val to: Account
     val amount: Amount
-    val pow: long
     val timestamp: Instant
 }
 
 type ReceiveRequest {
     val previous: TxId
     val source: AccountTxId
-    val pow: long
     val timestamp: Instant
 }
 
 
-type SignedRequest {
+type PowRequest {
     val request: Request
+    val pow: ByteArray
+  
+}
+
+type SignedPowRequest {
+    val powRequest: PowRequest
     val signature: Signature
 }
 

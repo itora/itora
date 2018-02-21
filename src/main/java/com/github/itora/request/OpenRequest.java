@@ -7,20 +7,17 @@ public final class OpenRequest extends Request {
 
     public final Account account;
 
-    public final long pow;
-
     public final Instant timestamp;
 
-    public OpenRequest(Account account, long pow, Instant timestamp) {
+    public OpenRequest(Account account, Instant timestamp) {
         this.account = account;
-        this.pow = pow;
         this.timestamp = timestamp;
     }
 
     public interface Factory {
 
-        public static OpenRequest openRequest(Account account, long pow, Instant timestamp) {
-            return new OpenRequest(account, pow, timestamp);
+        public static OpenRequest openRequest(Account account, Instant timestamp) {
+            return new OpenRequest(account, timestamp);
         }
     }
 
@@ -34,17 +31,7 @@ public final class OpenRequest extends Request {
     }
 
     public final OpenRequest withAccount(Account account) {
-        return new OpenRequest(account, pow, timestamp);
-    }
-
-    @Override
-    public final long pow() {
-        return pow;
-    }
-
-    @Override
-    public final OpenRequest withPow(long pow) {
-        return new OpenRequest(account, pow, timestamp);
+        return new OpenRequest(account, timestamp);
     }
 
     @Override
@@ -54,7 +41,7 @@ public final class OpenRequest extends Request {
 
     @Override
     public final OpenRequest withTimestamp(Instant timestamp) {
-        return new OpenRequest(account, pow, timestamp);
+        return new OpenRequest(account, timestamp);
     }
 
     public static Builder builder() {
@@ -62,7 +49,7 @@ public final class OpenRequest extends Request {
     }
 
     public final Builder toBuilder() {
-        return OpenRequest.builder().account(account).pow(pow).timestamp(timestamp);
+        return OpenRequest.builder().account(account).timestamp(timestamp);
     }
 
     @Override
@@ -77,24 +64,22 @@ public final class OpenRequest extends Request {
             return false;
         }
         OpenRequest that = (OpenRequest) o;
-        return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
+        return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(account, pow, timestamp);
+        return java.util.Objects.hash(account, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "OpenRequest{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+        return "OpenRequest{account = " + this.account + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
 
         public Account account;
-
-        public long pow;
 
         public Instant timestamp;
 
@@ -104,15 +89,6 @@ public final class OpenRequest extends Request {
 
         public final Builder account(Account account) {
             this.account = account;
-            return this;
-        }
-
-        public final long pow() {
-            return pow;
-        }
-
-        public final Builder pow(long pow) {
-            this.pow = pow;
             return this;
         }
 
@@ -126,7 +102,7 @@ public final class OpenRequest extends Request {
         }
 
         public final OpenRequest build() {
-            return new OpenRequest(account, pow, timestamp);
+            return new OpenRequest(account, timestamp);
         }
 
         @Override
@@ -141,17 +117,17 @@ public final class OpenRequest extends Request {
                 return false;
             }
             OpenRequest.Builder that = (OpenRequest.Builder) o;
-            return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
+            return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(account, pow, timestamp);
+            return java.util.Objects.hash(account, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "OpenRequest.Builder{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+            return "OpenRequest.Builder{account = " + this.account + ", timestamp = " + this.timestamp + "}";
         }
     }
 }
