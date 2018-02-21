@@ -13,9 +13,9 @@ import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
 import com.github.itora.chain.Lattice;
 import com.github.itora.chain.Lattices;
-import com.github.itora.request.Request;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.ReceiveRequest;
+import com.github.itora.request.Request;
 import com.github.itora.request.SendRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.OpenTx;
@@ -189,17 +189,14 @@ public final class AccountManagerImpl implements AccountManager {
     }
 
     private static Block findBlock(Lattice lattice, AccountTxId previous) {
-        Tx foundTx = null;
         Account account = previous.account();
         Chain chain = lattice.chains.get(account);
         for (Tx tx : Chains.iterate(chain)) {
             if (previous.txId.equals(tx.txId())) {
-                foundTx = tx;
-                // We could also get back to the OpenTx
-                break;
+                return new Block(account, chain, tx, previous.txId());
             }
         }
-        return foundTx == null ? null : new Block(account, chain, foundTx, previous.txId());
+        return null;
     }
 
 }
