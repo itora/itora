@@ -10,7 +10,7 @@ public final class Amounts {
 		return new Amount(a.value + b.value);
 	}
 
-	public static Amount invers(Amount a) {
+	public static Amount negate(Amount a) {
 		return new Amount(-a.value);
 	}
 }

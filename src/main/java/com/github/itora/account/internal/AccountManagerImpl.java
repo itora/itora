@@ -53,7 +53,7 @@ public final class AccountManagerImpl implements AccountManager {
 
                 @Override
                 public Amount visitSendTx(SendTx tx) {
-                    return Amounts.invers(tx.amount());
+                    return Amounts.negate(tx.amount());
                 }
             }));
         }
