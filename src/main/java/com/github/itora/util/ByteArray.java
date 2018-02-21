@@ -34,4 +34,8 @@ public final class ByteArray {
         ByteArray that = (ByteArray) o;
         return java.util.Arrays.equals(this.bytes, that.bytes);
     }
+    
+    public static ByteArray from(String base64) {
+    	return new ByteArray(BaseEncoding.base64().decode(base64));
+    }
 }
