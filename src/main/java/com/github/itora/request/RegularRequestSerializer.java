@@ -28,7 +28,8 @@ public final class RegularRequestSerializer implements RequestSerializer {
     		public ByteBuffer visitReceiveRequest(ReceiveRequest request) {
     			return Serializations.build(
 					RequestKind.RECEIVE,
-					Serializations.to(request.previous().id()),
+					Serializations.to(request.previous().account().key().value()),
+					Serializations.to(request.previous().txId().id()),
 					Serializations.to(request.source().account().key().value()),
 					Serializations.to(request.source().txId().id()),
 					Serializations.to(request.timestamp())
@@ -38,9 +39,9 @@ public final class RegularRequestSerializer implements RequestSerializer {
     		public ByteBuffer visitSendRequest(SendRequest request) {
     			return Serializations.build(
 					RequestKind.SEND,
-					Serializations.to(request.previous().id()),
-					Serializations.to(request.from().key().value()),
-					Serializations.to(request.to().key().value()),
+					Serializations.to(request.previous().account().key().value()),
+					Serializations.to(request.previous().txId().id()),
+					Serializations.to(request.destination().key().value()),
 					Serializations.to(request.amount().value()),
 					Serializations.to(request.timestamp())
     			);
@@ -58,7 +59,10 @@ public final class RegularRequestSerializer implements RequestSerializer {
 			);
 		case RECEIVE:
 			return Request.Factory.receiveRequest(
-				TxId.Factory.txId(Serializations.byteArrayFrom(buffer)),
+				AccountTxId.Factory.accountTxId(
+					Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+					TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
+				),
 				AccountTxId.Factory.accountTxId(
 					Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
 					TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
@@ -67,8 +71,10 @@ public final class RegularRequestSerializer implements RequestSerializer {
 			);
 		case SEND:
 			return Request.Factory.sendRequest(
-				TxId.Factory.txId(Serializations.byteArrayFrom(buffer)),
-				Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+				AccountTxId.Factory.accountTxId(
+					Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+					TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
+				),
 				Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
 				Amount.Factory.amount(Serializations.longFrom(buffer)),
 				Serializations.instantFrom(buffer)

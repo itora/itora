@@ -22,39 +22,39 @@ import com.github.itora.util.ByteArray;
 
 public class PowRequestSerializerImplTest {
 
-    private RegularPowRequestSerializer requestSerializer;
+	private RegularPowRequestSerializer requestSerializer;
 
-    @Before
-    public void setUp() throws Exception {
-        requestSerializer = new RegularPowRequestSerializer();
-    }
+	@Before
+	public void setUp() throws Exception {
+		requestSerializer = new RegularPowRequestSerializer();
+	}
 
-    private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
-    	ByteArray pow = AsymmetricKeys.random(100);
-    	PowRequest pr = PowRequest.Factory.powRequest(request, pow);
-        PowRequest result = requestSerializer.deserialize(requestSerializer.serialize(pr));
-        Assertions.assertThat(result).isEqualTo(pr);
-    }
+	private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
+		ByteArray pow = AsymmetricKeys.random(100);
+		PowRequest pr = PowRequest.Factory.powRequest(request, pow);
+		PowRequest result = requestSerializer.deserialize(requestSerializer.serialize(pr));
+		Assertions.assertThat(result).isEqualTo(pr);
+	}
 
-    @Test
-    public void shouldSerializeDeserialize() {
-        AsymmetricKey keyEN = AsymmetricKeys.generate();
-        AsymmetricKey keyS = AsymmetricKeys.generate();
+	@Test
+	public void shouldSerializeDeserialize() {
+		AsymmetricKey keyEN = AsymmetricKeys.generate();
+		AsymmetricKey keyS = AsymmetricKeys.generate();
 
-        Account accountEN = Account.Factory.account(keyEN.publicKey());
-        Account accountS = Account.Factory.account(keyS.publicKey());
+		Account accountEN = Account.Factory.account(keyEN.publicKey());
+		Account accountS = Account.Factory.account(keyS.publicKey());
 
-        OpenRequest open = Request.Factory.openRequest(accountEN, Instant.EPOCH);
-        SendRequest send = Request.Factory.sendRequest(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L),
-                Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveRequest receive = Request.Factory.receiveRequest(TxIds.txId(open),
-                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(send)),
-                Instant.EPOCH.plusSeconds(300_000L));
+		OpenRequest open = Request.Factory.openRequest(accountEN, Instant.EPOCH);
+		SendRequest send = Request.Factory.sendRequest(AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(open)),
+				accountS, Amount.Factory.amount(30_000L), Instant.EPOCH.plusSeconds(200_000L));
+		ReceiveRequest receive = Request.Factory.receiveRequest(
+				AccountTxId.Factory.accountTxId(accountS, TxIds.txId(open)),
+				AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(send)), Instant.EPOCH.plusSeconds(300_000L));
 
-        shouldSerializeDeserialize(open, keyEN);
-        shouldSerializeDeserialize(send, keyEN);
-        shouldSerializeDeserialize(receive, keyS);
+		shouldSerializeDeserialize(open, keyEN);
+		shouldSerializeDeserialize(send, keyEN);
+		shouldSerializeDeserialize(receive, keyS);
 
-    }
+	}
 
 }
