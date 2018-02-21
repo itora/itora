@@ -1,34 +1,31 @@
 package com.github.itora.request;
 
 import com.github.itora.account.Account;
+import com.github.itora.tx.AccountTxId;
 import com.github.itora.amount.Amount;
 import java.time.Instant;
-import com.github.itora.tx.TxId;
 
 public final class SendRequest extends Request {
 
-    public final TxId previous;
+    public final AccountTxId previous;
 
-    public final Account from;
-
-    public final Account to;
+    public final Account destination;
 
     public final Amount amount;
 
     public final Instant timestamp;
 
-    public SendRequest(TxId previous, Account from, Account to, Amount amount, Instant timestamp) {
+    public SendRequest(AccountTxId previous, Account destination, Amount amount, Instant timestamp) {
         this.previous = previous;
-        this.from = from;
-        this.to = to;
+        this.destination = destination;
         this.amount = amount;
         this.timestamp = timestamp;
     }
 
     public interface Factory {
 
-        public static SendRequest sendRequest(TxId previous, Account from, Account to, Amount amount, Instant timestamp) {
-            return new SendRequest(previous, from, to, amount, timestamp);
+        public static SendRequest sendRequest(AccountTxId previous, Account destination, Amount amount, Instant timestamp) {
+            return new SendRequest(previous, destination, amount, timestamp);
         }
     }
 
@@ -37,28 +34,20 @@ public final class SendRequest extends Request {
         return visitor.visitSendRequest(this);
     }
 
-    public final TxId previous() {
+    public final AccountTxId previous() {
         return previous;
     }
 
-    public final SendRequest withPrevious(TxId previous) {
-        return new SendRequest(previous, from, to, amount, timestamp);
+    public final SendRequest withPrevious(AccountTxId previous) {
+        return new SendRequest(previous, destination, amount, timestamp);
     }
 
-    public final Account from() {
-        return from;
+    public final Account destination() {
+        return destination;
     }
 
-    public final SendRequest withFrom(Account from) {
-        return new SendRequest(previous, from, to, amount, timestamp);
-    }
-
-    public final Account to() {
-        return to;
-    }
-
-    public final SendRequest withTo(Account to) {
-        return new SendRequest(previous, from, to, amount, timestamp);
+    public final SendRequest withDestination(Account destination) {
+        return new SendRequest(previous, destination, amount, timestamp);
     }
 
     public final Amount amount() {
@@ -66,7 +55,7 @@ public final class SendRequest extends Request {
     }
 
     public final SendRequest withAmount(Amount amount) {
-        return new SendRequest(previous, from, to, amount, timestamp);
+        return new SendRequest(previous, destination, amount, timestamp);
     }
 
     @Override
@@ -76,7 +65,7 @@ public final class SendRequest extends Request {
 
     @Override
     public final SendRequest withTimestamp(Instant timestamp) {
-        return new SendRequest(previous, from, to, amount, timestamp);
+        return new SendRequest(previous, destination, amount, timestamp);
     }
 
     public static Builder builder() {
@@ -84,7 +73,7 @@ public final class SendRequest extends Request {
     }
 
     public final Builder toBuilder() {
-        return SendRequest.builder().previous(previous).from(from).to(to).amount(amount).timestamp(timestamp);
+        return SendRequest.builder().previous(previous).destination(destination).amount(amount).timestamp(timestamp);
     }
 
     @Override
@@ -99,55 +88,44 @@ public final class SendRequest extends Request {
             return false;
         }
         SendRequest that = (SendRequest) o;
-        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.timestamp, that.timestamp);
+        return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.destination, that.destination) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
     @Override
     public final int hashCode() {
-        return java.util.Objects.hash(previous, from, to, amount, timestamp);
+        return java.util.Objects.hash(previous, destination, amount, timestamp);
     }
 
     @Override
     public final String toString() {
-        return "SendRequest{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", timestamp = " + this.timestamp + "}";
+        return "SendRequest{previous = " + this.previous + ", destination = " + this.destination + ", amount = " + this.amount + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
 
-        public TxId previous;
+        public AccountTxId previous;
 
-        public Account from;
-
-        public Account to;
+        public Account destination;
 
         public Amount amount;
 
         public Instant timestamp;
 
-        public final TxId previous() {
+        public final AccountTxId previous() {
             return previous;
         }
 
-        public final Builder previous(TxId previous) {
+        public final Builder previous(AccountTxId previous) {
             this.previous = previous;
             return this;
         }
 
-        public final Account from() {
-            return from;
+        public final Account destination() {
+            return destination;
         }
 
-        public final Builder from(Account from) {
-            this.from = from;
-            return this;
-        }
-
-        public final Account to() {
-            return to;
-        }
-
-        public final Builder to(Account to) {
-            this.to = to;
+        public final Builder destination(Account destination) {
+            this.destination = destination;
             return this;
         }
 
@@ -170,7 +148,7 @@ public final class SendRequest extends Request {
         }
 
         public final SendRequest build() {
-            return new SendRequest(previous, from, to, amount, timestamp);
+            return new SendRequest(previous, destination, amount, timestamp);
         }
 
         @Override
@@ -185,17 +163,17 @@ public final class SendRequest extends Request {
                 return false;
             }
             SendRequest.Builder that = (SendRequest.Builder) o;
-            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.from, that.from) && java.util.Objects.equals(this.to, that.to) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.timestamp, that.timestamp);
+            return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.destination, that.destination) && java.util.Objects.equals(this.amount, that.amount) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
         @Override
         public final int hashCode() {
-            return java.util.Objects.hash(previous, from, to, amount, timestamp);
+            return java.util.Objects.hash(previous, destination, amount, timestamp);
         }
 
         @Override
         public final String toString() {
-            return "SendRequest.Builder{previous = " + this.previous + ", from = " + this.from + ", to = " + this.to + ", amount = " + this.amount + ", timestamp = " + this.timestamp + "}";
+            return "SendRequest.Builder{previous = " + this.previous + ", destination = " + this.destination + ", amount = " + this.amount + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

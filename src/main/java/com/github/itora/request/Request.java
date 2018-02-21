@@ -4,7 +4,6 @@ import com.github.itora.account.Account;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.amount.Amount;
 import java.time.Instant;
-import com.github.itora.tx.TxId;
 
 public abstract class Request {
 
@@ -17,11 +16,11 @@ public abstract class Request {
             return new OpenRequest(account, timestamp);
         }
 
-        public static SendRequest sendRequest(TxId previous, Account from, Account to, Amount amount, Instant timestamp) {
-            return new SendRequest(previous, from, to, amount, timestamp);
+        public static SendRequest sendRequest(AccountTxId previous, Account destination, Amount amount, Instant timestamp) {
+            return new SendRequest(previous, destination, amount, timestamp);
         }
 
-        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
+        public static ReceiveRequest receiveRequest(AccountTxId previous, AccountTxId source, Instant timestamp) {
             return new ReceiveRequest(previous, source, timestamp);
         }
     }
