@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class AsymmetricKeysTest {
+public class CryptosTest {
 
     @Test
     public void shouldSignAndVerify() {
