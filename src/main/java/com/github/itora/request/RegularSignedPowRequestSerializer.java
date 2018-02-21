@@ -2,84 +2,111 @@ package com.github.itora.request;
 
 import java.nio.ByteBuffer;
 
+import com.github.itora.account.Account;
+import com.github.itora.amount.Amount;
+import com.github.itora.crypto.PublicKey;
 import com.github.itora.crypto.Signature;
-import com.github.itora.util.ByteArray;
-import com.google.common.primitives.Ints;
+import com.github.itora.serialization.Serializations;
+import com.github.itora.tx.AccountTxId;
+import com.github.itora.tx.TxId;
 
 public final class RegularSignedPowRequestSerializer implements SignedPowRequestSerializer {
 	public RegularSignedPowRequestSerializer() {
 	}
 	
-	private static interface ToByteBuffer {
-		int size();
-		void appendTo(ByteBuffer buffer);
-	}
-
-	private static final class ByteArrayToByteBuffer implements ToByteBuffer {
-		private final ByteArray value;
-		public ByteArrayToByteBuffer(ByteArray value) {
-			this.value = value;
-		}
-		@Override
-		public int size() {
-			return Ints.BYTES + value.bytes.length;
-		}
-		@Override
-		public void appendTo(ByteBuffer buffer) {
-			buffer.putInt(value.bytes.length); //TODO Optimize size
-			buffer.put(value.bytes);
-		}
-	}
-	
-	private static final class ByteBufferToByteBuffer implements ToByteBuffer {
-		private final ByteBuffer value;
-		public ByteBufferToByteBuffer(ByteBuffer value) {
-			this.value = value.duplicate();
-		}
-		@Override
-		public int size() {
-			return Ints.BYTES + value.remaining();
-		}
-		@Override
-		public void appendTo(ByteBuffer buffer) {
-			buffer.putInt(value.remaining()); //TODO Optimize size
-			buffer.put(value.duplicate());
-		}
-	}
-	
-	private static ByteBuffer build(ToByteBuffer... to) {
-		int totalSize = 0;
-		for (ToByteBuffer t : to) {
-			totalSize += t.size();
-		}
-		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-		for (ToByteBuffer t : to) {
-			t.appendTo(buffer);
-		}
-		buffer.flip();
-		return buffer;
-	}
-	
 	@Override
-	public ByteBuffer serialize(SignedRequest request) {
-		return build(
-			new ByteBufferToByteBuffer(new RegularRequestSerializer().serialize(request.request())),
-			new ByteArrayToByteBuffer(request.signature().value())
-		);
-	}
-
-	private static ByteArray byteArrayFrom(ByteBuffer buffer) {
-		int size = buffer.getInt();
-		byte[] bytes = new byte[size]; //TODO Verif too big sizes
-		buffer.get(bytes);
-		return new ByteArray(bytes);
+	public ByteBuffer serialize(SignedPowRequest signedRequest) {
+		return Request.visit(signedRequest.powRequest().request(), new Request.Visitor<ByteBuffer>() {
+    		@Override
+    		public ByteBuffer visitOpenRequest(OpenRequest request) {
+    			return Serializations.build(
+    				RequestKind.OPEN,
+					Serializations.to(request.account().key().value()),
+					Serializations.to(request.timestamp()),
+					Serializations.to(signedRequest.powRequest().pow()),
+					Serializations.to(signedRequest.signature().value())
+    			);
+    		}
+    		@Override
+    		public ByteBuffer visitReceiveRequest(ReceiveRequest request) {
+    			return Serializations.build(
+					RequestKind.RECEIVE,
+					Serializations.to(request.previous().account().key().value()),
+					Serializations.to(request.previous().txId().id()),
+					Serializations.to(request.source().account().key().value()),
+					Serializations.to(request.source().txId().id()),
+					Serializations.to(request.timestamp()),
+					Serializations.to(signedRequest.powRequest().pow()),
+					Serializations.to(signedRequest.signature().value())
+    			);
+    		}
+    		@Override
+    		public ByteBuffer visitSendRequest(SendRequest request) {
+    			return Serializations.build(
+					RequestKind.SEND,
+					Serializations.to(request.previous().account().key().value()),
+					Serializations.to(request.previous().txId().id()),
+					Serializations.to(request.destination().key().value()),
+					Serializations.to(request.amount().value()),
+					Serializations.to(request.timestamp()),
+					Serializations.to(signedRequest.powRequest().pow()),
+					Serializations.to(signedRequest.signature().value())
+    			);
+    		}
+    	});
 	}
 	
 	@Override
 	public SignedPowRequest deserialize(ByteBuffer buffer) {
-		return SignedPowRequest.Factory.signedPowRequest(
-			new RegularRequestSerializer().deserialize(buffer),
-			Signature.Factory.signature(byteArrayFrom(buffer))
-		);
+		switch (RequestKind.requestKindFrom(buffer)) {
+		case OPEN:
+			return SignedPowRequest.Factory.signedPowRequest(
+				PowRequest.Factory.powRequest(
+					Request.Factory.openRequest(
+						Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+						Serializations.instantFrom(buffer)
+					),
+					Serializations.byteArrayFrom(buffer)
+				),
+				Signature.Factory.signature(Serializations.byteArrayFrom(buffer))
+			);
+		case RECEIVE:
+			return SignedPowRequest.Factory.signedPowRequest(
+				PowRequest.Factory.powRequest(
+					Request.Factory.receiveRequest(
+						AccountTxId.Factory.accountTxId(
+							Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+							TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
+						),
+						AccountTxId.Factory.accountTxId(
+							Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+							TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
+						),
+						Serializations.instantFrom(buffer)
+					),
+					Serializations.byteArrayFrom(buffer)
+				),
+				Signature.Factory.signature(Serializations.byteArrayFrom(buffer))
+			);
+		case SEND:
+			return SignedPowRequest.Factory.signedPowRequest(
+				PowRequest.Factory.powRequest(
+					Request.Factory.sendRequest(
+						AccountTxId.Factory.accountTxId(
+							Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+							TxId.Factory.txId(Serializations.byteArrayFrom(buffer))
+						),
+						Account.Factory.account(PublicKey.Factory.publicKey(Serializations.byteArrayFrom(buffer))),
+						Amount.Factory.amount(Serializations.longFrom(buffer)),
+						Serializations.instantFrom(buffer)
+					),
+					Serializations.byteArrayFrom(buffer)
+				),
+				Signature.Factory.signature(Serializations.byteArrayFrom(buffer))
+			);
+		default:
+			// Impossible case
+			return null;
+		}
 	}
 }

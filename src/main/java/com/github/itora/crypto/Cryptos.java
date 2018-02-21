@@ -1,23 +1,18 @@
 package com.github.itora.crypto;
 
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import com.github.itora.util.ByteArray;
 
-public final class AsymmetricKeys {
+public final class Cryptos {
     static {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
@@ -25,7 +20,13 @@ public final class AsymmetricKeys {
     // Allegedly thread-safe
     public static final SecureRandom RANDOM = new SecureRandom();
 
-    private AsymmetricKeys() {
+    private Cryptos() {
+    }
+
+    public static ByteArray random(int size) {
+    	byte[] bytes = new byte[size];
+    	RANDOM.nextBytes(bytes);
+    	return new ByteArray(bytes);
     }
 
     public static ByteArray hash(ByteBuffer buffer) {
@@ -82,10 +83,9 @@ public final class AsymmetricKeys {
 			s.initVerify(k);
 			s.update(b);
 	
-                return s.verify(signature.value().bytes);
-            } catch (SignatureException | InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException e) {
-                throw new CryptoException(e);
+            return s.verify(signature.value().bytes);
+        } catch (Exception e) {
+            throw new CryptoException(e);
         }
-
     }
 }

@@ -5,7 +5,7 @@ import java.time.Instant;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
-import com.github.itora.crypto.AsymmetricKeys;
+import com.github.itora.crypto.Cryptos;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.ReceiveRequest;
 import com.github.itora.request.RegularRequestSerializer;
@@ -33,18 +33,18 @@ public class RequestSerializerImplTest {
 
     @Test
     public void shouldSerializeDeserialize() {
-        AsymmetricKey keyEN = AsymmetricKeys.generate();
-        AsymmetricKey keyS = AsymmetricKeys.generate();
+        AsymmetricKey keyEN = Cryptos.generate();
+        AsymmetricKey keyS = Cryptos.generate();
 
         Account accountEN = Account.Factory.account(keyEN.publicKey());
         Account accountS = Account.Factory.account(keyS.publicKey());
 
-        OpenRequest open = Request.Factory.openRequest(accountEN, Instant.EPOCH);
-        SendRequest send = Request.Factory.sendRequest(TxIds.txId(open), accountEN, accountS, Amount.Factory.amount(30_000L),
-                Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveRequest receive = Request.Factory.receiveRequest(TxIds.txId(open),
-                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(send)),
-                Instant.EPOCH.plusSeconds(300_000L));
+		OpenRequest open = Request.Factory.openRequest(accountEN, Instant.EPOCH);
+		SendRequest send = Request.Factory.sendRequest(AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(open)),
+				accountS, Amount.Factory.amount(30_000L), Instant.EPOCH.plusSeconds(200_000L));
+		ReceiveRequest receive = Request.Factory.receiveRequest(
+				AccountTxId.Factory.accountTxId(accountS, TxIds.txId(open)),
+				AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(send)), Instant.EPOCH.plusSeconds(300_000L));
 
         shouldSerializeDeserialize(open);
         shouldSerializeDeserialize(send);

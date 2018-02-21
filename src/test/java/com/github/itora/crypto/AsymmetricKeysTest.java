@@ -9,14 +9,14 @@ public class AsymmetricKeysTest {
 
     @Test
     public void shouldSignAndVerify() {
-    	AsymmetricKey asymmetricKey = AsymmetricKeys.generate();
+    	AsymmetricKey asymmetricKey = Cryptos.generate();
 
     	byte[] randomBuffer = new byte[100_000];
-    	AsymmetricKeys.RANDOM.nextBytes(randomBuffer);
-    	Signature signature = AsymmetricKeys.sign(ByteBuffer.wrap(randomBuffer), asymmetricKey.privateKey());
+    	Cryptos.RANDOM.nextBytes(randomBuffer);
+    	Signature signature = Cryptos.sign(ByteBuffer.wrap(randomBuffer), asymmetricKey.privateKey());
     	System.out.println(signature);
     	try {
-    		AsymmetricKeys.verify(signature, ByteBuffer.wrap(randomBuffer), asymmetricKey.publicKey());
+    		Cryptos.verify(signature, ByteBuffer.wrap(randomBuffer), asymmetricKey.publicKey());
     	} catch (CryptoException e) {
         	Assertions.fail("Fail", e);
     	}

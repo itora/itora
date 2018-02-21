@@ -6,7 +6,7 @@ import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.crypto.AsymmetricKey;
-import com.github.itora.crypto.AsymmetricKeys;
+import com.github.itora.crypto.Cryptos;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.ReceiveRequest;
 import com.github.itora.request.Request;
@@ -29,9 +29,9 @@ public class AccountManagerImplTest {
     public void setUp() throws Exception {
         accountManager = new AccountManagerImpl(LatticeBootstrap.EMPTY);
 
-        AsymmetricKey keyEN = AsymmetricKeys.generate();
-        AsymmetricKey keyS = AsymmetricKeys.generate();
-        AsymmetricKey keyD = AsymmetricKeys.generate();
+        AsymmetricKey keyEN = Cryptos.generate();
+        AsymmetricKey keyS = Cryptos.generate();
+        AsymmetricKey keyD = Cryptos.generate();
 
         accountEN = Account.Factory.account(keyEN.publicKey());
         accountS = Account.Factory.account(keyS.publicKey());
