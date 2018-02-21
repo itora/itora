@@ -1,22 +1,23 @@
-model com.github.itora.event
+model com.github.itora.request
 
 import java:java.time#Instant 
+import java:com.github.itora.tx#AccountTxId
 import java:com.github.itora.tx#TxId
 import java:com.github.itora.account#Account
 import java:com.github.itora.amount#Amount
 import java:com.github.itora.crypto#Signature
 
 
-type Event = OpenEvent | SendEvent | ReceiveEvent
+type Request = OpenRequest | SendRequest | ReceiveRequest
 
 
-type OpenEvent {
+type OpenRequest {
     val account: Account
     val pow: long
     val timestamp: Instant
 }
 
-type SendEvent {
+type SendRequest {
     val previous: TxId
     val from: Account
     val to: Account
@@ -25,15 +26,16 @@ type SendEvent {
     val timestamp: Instant
 }
 
-type ReceiveEvent {
+type ReceiveRequest {
     val previous: TxId
-    val source: TxId
+    val source: AccountTxId
     val pow: long
     val timestamp: Instant
 }
 
-type SignedEvent {
-    val event: Event
+
+type SignedRequest {
+    val request: Request
     val signature: Signature
 }
 

@@ -1,4 +1,4 @@
-package com.github.itora.event;
+package com.github.itora.request;
 
 import java.nio.ByteBuffer;
 
@@ -6,8 +6,8 @@ import com.github.itora.crypto.Signature;
 import com.github.itora.util.ByteArray;
 import com.google.common.primitives.Ints;
 
-public final class RegularSignedEventSerializer implements SignedEventSerializer {
-	public RegularSignedEventSerializer() {
+public final class RegularSignedRequestSerializer implements SignedRequestSerializer {
+	public RegularSignedRequestSerializer() {
 	}
 	
 	private static interface ToByteBuffer {
@@ -61,10 +61,10 @@ public final class RegularSignedEventSerializer implements SignedEventSerializer
 	}
 	
 	@Override
-	public ByteBuffer serialize(SignedEvent event) {
+	public ByteBuffer serialize(SignedRequest request) {
 		return build(
-			new ByteBufferToByteBuffer(new RegularEventSerializer().serialize(event.event())),
-			new ByteArrayToByteBuffer(event.signature().value())
+			new ByteBufferToByteBuffer(new RegularRequestSerializer().serialize(request.request())),
+			new ByteArrayToByteBuffer(request.signature().value())
 		);
 	}
 
@@ -76,9 +76,9 @@ public final class RegularSignedEventSerializer implements SignedEventSerializer
 	}
 	
 	@Override
-	public SignedEvent deserialize(ByteBuffer buffer) {
-		return new SignedEvent(
-			new RegularEventSerializer().deserialize(buffer),
+	public SignedRequest deserialize(ByteBuffer buffer) {
+		return SignedRequest.Factory.signedRequest(
+			new RegularRequestSerializer().deserialize(buffer),
 			Signature.Factory.signature(byteArrayFrom(buffer))
 		);
 	}

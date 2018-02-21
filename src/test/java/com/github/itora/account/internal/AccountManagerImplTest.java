@@ -7,10 +7,11 @@ import com.github.itora.amount.Amount;
 import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.crypto.AsymmetricKey;
 import com.github.itora.crypto.AsymmetricKeys;
-import com.github.itora.event.Event;
-import com.github.itora.event.OpenEvent;
-import com.github.itora.event.ReceiveEvent;
-import com.github.itora.event.SendEvent;
+import com.github.itora.request.OpenRequest;
+import com.github.itora.request.ReceiveRequest;
+import com.github.itora.request.Request;
+import com.github.itora.request.SendRequest;
+import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxIds;
 
 import org.assertj.core.api.Assertions;
@@ -27,7 +28,7 @@ public class AccountManagerImplTest {
     @Before
     public void setUp() throws Exception {
         accountManager = new AccountManagerImpl(LatticeBootstrap.EMPTY);
-        
+
         AsymmetricKey keyEN = AsymmetricKeys.generate();
         AsymmetricKey keyS = AsymmetricKeys.generate();
         AsymmetricKey keyD = AsymmetricKeys.generate();
@@ -39,22 +40,24 @@ public class AccountManagerImplTest {
 
     @Test
     public void shouldPlayScenario1() {
-        OpenEvent openEN = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH);
-        OpenEvent openS = Event.Factory.openEvent(accountS, 0L, Instant.EPOCH);
-        OpenEvent openD = Event.Factory.openEvent(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
+        OpenRequest openEN = Request.Factory.openRequest(accountEN, 0L, Instant.EPOCH);
+        OpenRequest openS = Request.Factory.openRequest(accountS, 0L, Instant.EPOCH);
+        OpenRequest openD = Request.Factory.openRequest(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
 
         accountManager.accept(openEN, openS, openD);
 
-        SendEvent sendENtoS = Event.Factory.sendEvent(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
+        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveEvent receiveSfromEN = Event.Factory.receiveEvent(TxIds.txId(openS), TxIds.txId(sendENtoS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 0L, Instant.EPOCH.plusSeconds(300_000L));
 
         accountManager.accept(sendENtoS, receiveSfromEN);
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendEvent sendStoD = Event.Factory.sendEvent(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L), 0L,
+        SendRequest sendStoD = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+                0L,
                 Instant.EPOCH.plusSeconds(400_000L));
 
         accountManager.accept(sendStoD);
@@ -62,7 +65,8 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD),
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD)),
                 0L, Instant.EPOCH.plusSeconds(500_000L));
 
         accountManager.accept(receiveDfromS);
@@ -72,25 +76,27 @@ public class AccountManagerImplTest {
     }
 
     @Test
-    public void shouldIgnoreEventsAlreadyProcessed() {
-        OpenEvent openEN = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH);
-        OpenEvent openS = Event.Factory.openEvent(accountS, 0L, Instant.EPOCH);
-        OpenEvent openD = Event.Factory.openEvent(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
+    public void shouldIgnoreRequestsAlreadyProcessed() {
+        OpenRequest openEN = Request.Factory.openRequest(accountEN, 0L, Instant.EPOCH);
+        OpenRequest openS = Request.Factory.openRequest(accountS, 0L, Instant.EPOCH);
+        OpenRequest openD = Request.Factory.openRequest(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
 
         accountManager.accept(openEN, openS, openD);
 
-        SendEvent sendENtoS = Event.Factory.sendEvent(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
+        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveEvent receiveSfromEN = Event.Factory.receiveEvent(TxIds.txId(openS), TxIds.txId(sendENtoS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 0L, Instant.EPOCH.plusSeconds(300_000L));
 
         accountManager.accept(sendENtoS, receiveSfromEN);
-        
+
         accountManager.accept(openS);
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendEvent sendStoD = Event.Factory.sendEvent(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L), 0L,
+        SendRequest sendStoD = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+                0L,
                 Instant.EPOCH.plusSeconds(400_000L));
 
         accountManager.accept(sendStoD);
@@ -99,55 +105,57 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD), 
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD)),
                 0L, Instant.EPOCH.plusSeconds(500_000L));
 
         accountManager.accept(receiveDfromS);
         accountManager.accept(receiveDfromS);
 
-
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(5_000L));
 
     }
-    
+
     @Test
     public void shouldDetectDoubleSpend() {
-        OpenEvent openEN = Event.Factory.openEvent(accountEN, 0L, Instant.EPOCH);
-        OpenEvent openS = Event.Factory.openEvent(accountS, 0L, Instant.EPOCH);
-        OpenEvent openD = Event.Factory.openEvent(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
+        OpenRequest openEN = Request.Factory.openRequest(accountEN, 0L, Instant.EPOCH);
+        OpenRequest openS = Request.Factory.openRequest(accountS, 0L, Instant.EPOCH);
+        OpenRequest openD = Request.Factory.openRequest(accountD, 0L, Instant.EPOCH.plusSeconds(86_400L));
 
         accountManager.accept(openEN, openS, openD);
 
-        SendEvent sendENtoS = Event.Factory.sendEvent(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
+        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L), 0L,
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveEvent receiveSfromEN = Event.Factory.receiveEvent(TxIds.txId(openS), TxIds.txId(sendENtoS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 0L, Instant.EPOCH.plusSeconds(300_000L));
 
         accountManager.accept(sendENtoS, receiveSfromEN);
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendEvent sendStoD1 = Event.Factory.sendEvent(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L), 0L,
+        SendRequest sendStoD1 = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+                0L,
                 Instant.EPOCH.plusSeconds(400_000L));
-        SendEvent sendStoD2 = Event.Factory.sendEvent(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(6_000L), 0L,
+        SendRequest sendStoD2 = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(6_000L),
+                0L,
                 Instant.EPOCH.plusSeconds(400_000L));
 
-        
         accountManager.accept(sendStoD1);
         accountManager.accept(sendStoD2);
-
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveEvent receiveDfromS = Event.Factory.receiveEvent(TxIds.txId(openD), TxIds.txId(sendStoD1),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD), 
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD1)),
                 0L, Instant.EPOCH.plusSeconds(500_000L));
 
         accountManager.accept(receiveDfromS);
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
-        Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(5_000L));   
+        Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(5_000L));
     }
 
 }

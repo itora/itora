@@ -1,5 +1,6 @@
 package com.github.itora.chain;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import com.github.itora.tx.Tx;
@@ -20,6 +21,9 @@ public final class Chains {
     }
 
     public static Iterable<Tx> iterate(Chain chain) {
+        if (chain == null) {
+            return Collections.emptyList();
+        }
         return new Iterable<Tx>() {
             @Override
             public Iterator<Tx> iterator() {
@@ -28,7 +32,7 @@ public final class Chains {
 
                     @Override
                     public boolean hasNext() {
-                        return (next != null && !next.equals(Chains.ROOT));
+                        return !next.equals(Chains.ROOT);
                     }
 
                     @Override

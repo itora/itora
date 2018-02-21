@@ -1,4 +1,4 @@
-package com.github.itora.event;
+package com.github.itora.request;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -6,13 +6,14 @@ import java.time.Instant;
 import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.PublicKey;
+import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxId;
 import com.github.itora.util.ByteArray;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
-public final class RegularEventSerializer implements EventSerializer {
-	public RegularEventSerializer() {
+public final class RegularRequestSerializer implements RequestSerializer {
+	public RegularRequestSerializer() {
 	}
 	
 	private static interface ToByteBuffer {
@@ -112,37 +113,38 @@ public final class RegularEventSerializer implements EventSerializer {
 	}
 	
 	@Override
-	public ByteBuffer serialize(Event event) {
-		return Event.visit(event, new Event.Visitor<ByteBuffer>() {
+	public ByteBuffer serialize(Request event) {
+		return Request.visit(event, new Request.Visitor<ByteBuffer>() {
     		@Override
-    		public ByteBuffer visitOpenEvent(OpenEvent event) {
+    		public ByteBuffer visitOpenRequest(OpenRequest request) {
     			return build(
     				EventKind.OPEN,
-					new ByteArrayToByteBuffer(event.account().key().value()),
+					new ByteArrayToByteBuffer(request.account().key().value()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
     		}
     		@Override
-    		public ByteBuffer visitReceiveEvent(ReceiveEvent event) {
+    		public ByteBuffer visitReceiveRequest(ReceiveRequest request) {
     			return build(
     				EventKind.RECEIVE,
-					new ByteArrayToByteBuffer(event.previous().id()),
-					new ByteArrayToByteBuffer(event.source().id()),
+					new ByteArrayToByteBuffer(request.previous().id()),
+	                new ByteArrayToByteBuffer(request.source.account().key().value()),
+					new ByteArrayToByteBuffer(request.source().txId().id()),
 					new LongToByteBuffer(event.pow()),
 					new InstantToByteBuffer(event.timestamp())
     			);
     		}
     		@Override
-    		public ByteBuffer visitSendEvent(SendEvent event) {
+    		public ByteBuffer visitSendRequest(SendRequest request) {
     			return build(
     				EventKind.SEND,
-					new ByteArrayToByteBuffer(event.previous().id()),
-					new ByteArrayToByteBuffer(event.from().key().value()),
-					new ByteArrayToByteBuffer(event.to().key().value()),
-					new LongToByteBuffer(event.amount().value()),
-					new LongToByteBuffer(event.pow()),
-					new InstantToByteBuffer(event.timestamp())
+					new ByteArrayToByteBuffer(request.previous().id()),
+					new ByteArrayToByteBuffer(request.from().key().value()),
+					new ByteArrayToByteBuffer(request.to().key().value()),
+					new LongToByteBuffer(request.amount().value()),
+					new LongToByteBuffer(request.pow()),
+					new InstantToByteBuffer(request.timestamp())
     			);
     		}
     	});
@@ -156,20 +158,22 @@ public final class RegularEventSerializer implements EventSerializer {
 	}
 	
 	@Override
-	public Event deserialize(ByteBuffer buffer) {
+	public Request deserialize(ByteBuffer buffer) {
 		switch (EventKind.parse(buffer)) {
 		case OPEN: {
 			Account account = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.openEvent(account, pow, timestamp);
+			return Request.Factory.openRequest(account, pow, timestamp);
 		}
 		case RECEIVE: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
-			TxId source = TxId.Factory.txId(byteArrayFrom(buffer));
+	        Account sourceAccount = Account.Factory.account(PublicKey.Factory.publicKey(byteArrayFrom(buffer)));
+			TxId sourceTxId = TxId.Factory.txId(byteArrayFrom(buffer));
+	        AccountTxId source = AccountTxId.Factory.accountTxId(sourceAccount, sourceTxId);
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.receiveEvent(previous, source, pow, timestamp);
+            return Request.Factory.receiveRequest(previous, source, pow, timestamp);
 		}
 		case SEND: {
 			TxId previous = TxId.Factory.txId(byteArrayFrom(buffer));
@@ -178,7 +182,7 @@ public final class RegularEventSerializer implements EventSerializer {
 			Amount amount = Amount.Factory.amount(buffer.getLong());
 			long pow = buffer.getLong();
 			Instant timestamp = Instant.ofEpochSecond(buffer.getLong(), buffer.getInt());
-			return Event.Factory.sendEvent(previous, from, to, amount, pow, timestamp);
+			return Request.Factory.sendRequest(previous, from, to, amount, pow, timestamp);
 		}
 		default: {
 			// Impossible case

@@ -1,9 +1,9 @@
-package com.github.itora.event;
+package com.github.itora.request;
 
 import com.github.itora.account.Account;
 import java.time.Instant;
 
-public final class OpenEvent extends Event {
+public final class OpenRequest extends Request {
 
     public final Account account;
 
@@ -11,7 +11,7 @@ public final class OpenEvent extends Event {
 
     public final Instant timestamp;
 
-    public OpenEvent(Account account, long pow, Instant timestamp) {
+    public OpenRequest(Account account, long pow, Instant timestamp) {
         this.account = account;
         this.pow = pow;
         this.timestamp = timestamp;
@@ -19,22 +19,22 @@ public final class OpenEvent extends Event {
 
     public interface Factory {
 
-        public static OpenEvent openEvent(Account account, long pow, Instant timestamp) {
-            return new OpenEvent(account, pow, timestamp);
+        public static OpenRequest openRequest(Account account, long pow, Instant timestamp) {
+            return new OpenRequest(account, pow, timestamp);
         }
     }
 
     @Override
-    final <R> R visit(Event.Visitor<R> visitor) {
-        return visitor.visitOpenEvent(this);
+    final <R> R visit(Request.Visitor<R> visitor) {
+        return visitor.visitOpenRequest(this);
     }
 
     public final Account account() {
         return account;
     }
 
-    public final OpenEvent withAccount(Account account) {
-        return new OpenEvent(account, pow, timestamp);
+    public final OpenRequest withAccount(Account account) {
+        return new OpenRequest(account, pow, timestamp);
     }
 
     @Override
@@ -43,8 +43,8 @@ public final class OpenEvent extends Event {
     }
 
     @Override
-    public final OpenEvent withPow(long pow) {
-        return new OpenEvent(account, pow, timestamp);
+    public final OpenRequest withPow(long pow) {
+        return new OpenRequest(account, pow, timestamp);
     }
 
     @Override
@@ -53,8 +53,8 @@ public final class OpenEvent extends Event {
     }
 
     @Override
-    public final OpenEvent withTimestamp(Instant timestamp) {
-        return new OpenEvent(account, pow, timestamp);
+    public final OpenRequest withTimestamp(Instant timestamp) {
+        return new OpenRequest(account, pow, timestamp);
     }
 
     public static Builder builder() {
@@ -62,7 +62,7 @@ public final class OpenEvent extends Event {
     }
 
     public final Builder toBuilder() {
-        return OpenEvent.builder().account(account).pow(pow).timestamp(timestamp);
+        return OpenRequest.builder().account(account).pow(pow).timestamp(timestamp);
     }
 
     @Override
@@ -76,7 +76,7 @@ public final class OpenEvent extends Event {
         if (getClass() != o.getClass()) {
             return false;
         }
-        OpenEvent that = (OpenEvent) o;
+        OpenRequest that = (OpenRequest) o;
         return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
@@ -87,7 +87,7 @@ public final class OpenEvent extends Event {
 
     @Override
     public final String toString() {
-        return "OpenEvent{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+        return "OpenRequest{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
@@ -125,8 +125,8 @@ public final class OpenEvent extends Event {
             return this;
         }
 
-        public final OpenEvent build() {
-            return new OpenEvent(account, pow, timestamp);
+        public final OpenRequest build() {
+            return new OpenRequest(account, pow, timestamp);
         }
 
         @Override
@@ -140,7 +140,7 @@ public final class OpenEvent extends Event {
             if (getClass() != o.getClass()) {
                 return false;
             }
-            OpenEvent.Builder that = (OpenEvent.Builder) o;
+            OpenRequest.Builder that = (OpenRequest.Builder) o;
             return java.util.Objects.equals(this.account, that.account) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
@@ -151,7 +151,7 @@ public final class OpenEvent extends Event {
 
         @Override
         public final String toString() {
-            return "OpenEvent.Builder{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+            return "OpenRequest.Builder{account = " + this.account + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
         }
     }
 }

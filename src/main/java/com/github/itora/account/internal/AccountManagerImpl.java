@@ -13,10 +13,11 @@ import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
 import com.github.itora.chain.Lattice;
 import com.github.itora.chain.Lattices;
-import com.github.itora.event.Event;
-import com.github.itora.event.OpenEvent;
-import com.github.itora.event.ReceiveEvent;
-import com.github.itora.event.SendEvent;
+import com.github.itora.request.Request;
+import com.github.itora.request.OpenRequest;
+import com.github.itora.request.ReceiveRequest;
+import com.github.itora.request.SendRequest;
+import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.OpenTx;
 import com.github.itora.tx.ReceiveTx;
 import com.github.itora.tx.SendTx;
@@ -60,17 +61,17 @@ public final class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public void accept(Event event) {
-        lattice.getAndUpdate(currentLattice -> accept(event, currentLattice));
+    public void accept(Request request) {
+        lattice.getAndUpdate(currentLattice -> accept(request, currentLattice));
     }
 
-    public static Lattice accept(Event event, Lattice lattice) {
-        // TODO Check the event validity
-        return Event.visit(event, new Event.Visitor<Lattice>() {
+    public static Lattice accept(Request request, Lattice lattice) {
+        // TODO Check the request validity
+        return Request.visit(request, new Request.Visitor<Lattice>() {
 
             @Override
-            public Lattice visitOpenEvent(OpenEvent event) {
-                TxId txId = TxIds.txId(event);
+            public Lattice visitOpenRequest(OpenRequest request) {
+                TxId txId = TxIds.txId(request);
 
                 // Check if this block was already processed!
                 Block thisBlock = findBlock(lattice, txId);
@@ -78,15 +79,15 @@ public final class AccountManagerImpl implements AccountManager {
                     return lattice;
                 }
 
-                Account account = event.account();
+                Account account = request.account();
                 Chain previous = lattice.chains.get(account);
 
-                // A chain must be inexistent or the open event is ignored
+                // A chain must be inexistent or the open request is ignored
                 if (previous != null) {
                     return lattice;
                 }
 
-                Tx tx = Tx.Factory.openTx(txId, event.timestamp());
+                Tx tx = Tx.Factory.openTx(txId, request.timestamp());
 
                 Chain chain = Chain.Factory.chainLink(Chains.ROOT, tx);
 
@@ -94,41 +95,41 @@ public final class AccountManagerImpl implements AccountManager {
             }
 
             @Override
-            public Lattice visitReceiveEvent(ReceiveEvent event) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.previous);
+            public Lattice visitReceiveRequest(ReceiveRequest request) {
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, request.previous);
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
                     return lattice;
                 }
-                
+
                 Block previousBlock = previousBlockValidation.block;
-                TxId txId = TxIds.txId(event);
+                TxId txId = TxIds.txId(request);
 
-                TxId sourceTxId = event.source();
+                AccountTxId source = request.source();
 
-                Amount amount = findAmount(lattice, sourceTxId);
+                Amount amount = findAmount(lattice, source);
 
-                Tx tx = Tx.Factory.receiveTx(txId, amount, event.timestamp());
+                Tx tx = Tx.Factory.receiveTx(txId, amount, request.timestamp());
                 Chain previous = lattice.chains.get(previousBlock.account);
 
                 return add(previousBlock.account, previous, tx);
             }
 
             @Override
-            public Lattice visitSendEvent(SendEvent event) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, event.previous);
+            public Lattice visitSendRequest(SendRequest request) {
+                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, request.previous);
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
                     return lattice;
                 }
 
-                TxId txId = TxIds.txId(event);
+                TxId txId = TxIds.txId(request);
 
-                Account account = event.from();
+                Account account = request.from();
 
-                Tx tx = Tx.Factory.sendTx(txId, event.to(), event.amount(), event.timestamp());
+                Tx tx = Tx.Factory.sendTx(txId, request.to(), request.amount(), request.timestamp());
                 Chain previous = lattice.chains.get(account);
                 return add(account, previous, tx);
 
@@ -142,37 +143,38 @@ public final class AccountManagerImpl implements AccountManager {
         });
     }
 
-    private static Amount findAmount(Lattice lattice, TxId sourceTxId) {
+    private static Amount findAmount(Lattice lattice, AccountTxId accountTxId) {
         Amount amount = null;
-        for (java.util.Map.Entry<Account, Chain> entry : lattice.chains.asMap().entrySet()) {
-            for (Tx tx : Chains.iterate(entry.getValue())) {
-                if (sourceTxId.equals(tx.txId())) {
-                    Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
-                        @Override
-                        public Optional<Amount> visitOpenTx(OpenTx tx) {
-                            return Optional.empty();
-                        }
+        Chain chain = lattice.chains().get(accountTxId.account());
+        for (Tx tx : Chains.iterate(chain)) {
+            if (accountTxId.txId().equals(tx.txId())) {
+                Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
+                    @Override
+                    public Optional<Amount> visitOpenTx(OpenTx tx) {
+                        return Optional.empty();
+                    }
 
-                        @Override
-                        public Optional<Amount> visitReceiveTx(ReceiveTx tx) {
-                            return Optional.empty();
-                        }
+                    @Override
+                    public Optional<Amount> visitReceiveTx(ReceiveTx tx) {
+                        return Optional.empty();
+                    }
 
-                        @Override
-                        public Optional<Amount> visitSendTx(SendTx tx) {
-                            return Optional.of(tx.amount());
-                        }
-                    });
+                    @Override
+                    public Optional<Amount> visitSendTx(SendTx tx) {
+                        return Optional.of(tx.amount());
+                    }
+                });
 
-                    amount = a.get();
-                    break;
-                }
+                amount = a.get();
+                break;
             }
+
             if (amount != null) {
                 break;
             }
         }
         return amount;
+
     }
 
     private static BlockValiditation checkBlockValidity(Lattice lattice, TxId previous) {

@@ -10,6 +10,11 @@ type TxId {
   val id: ByteArray 
 }
 
+type AccountTxId {
+    val account: Account
+    val txId: TxId
+}
+
 type Tx = OpenTx | SendTx | ReceiveTx
 
 type OpenTx {

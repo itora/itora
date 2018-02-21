@@ -1,19 +1,20 @@
-package com.github.itora.event;
+package com.github.itora.request;
 
+import com.github.itora.tx.AccountTxId;
 import java.time.Instant;
 import com.github.itora.tx.TxId;
 
-public final class ReceiveEvent extends Event {
+public final class ReceiveRequest extends Request {
 
     public final TxId previous;
 
-    public final TxId source;
+    public final AccountTxId source;
 
     public final long pow;
 
     public final Instant timestamp;
 
-    public ReceiveEvent(TxId previous, TxId source, long pow, Instant timestamp) {
+    public ReceiveRequest(TxId previous, AccountTxId source, long pow, Instant timestamp) {
         this.previous = previous;
         this.source = source;
         this.pow = pow;
@@ -22,30 +23,30 @@ public final class ReceiveEvent extends Event {
 
     public interface Factory {
 
-        public static ReceiveEvent receiveEvent(TxId previous, TxId source, long pow, Instant timestamp) {
-            return new ReceiveEvent(previous, source, pow, timestamp);
+        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, long pow, Instant timestamp) {
+            return new ReceiveRequest(previous, source, pow, timestamp);
         }
     }
 
     @Override
-    final <R> R visit(Event.Visitor<R> visitor) {
-        return visitor.visitReceiveEvent(this);
+    final <R> R visit(Request.Visitor<R> visitor) {
+        return visitor.visitReceiveRequest(this);
     }
 
     public final TxId previous() {
         return previous;
     }
 
-    public final ReceiveEvent withPrevious(TxId previous) {
-        return new ReceiveEvent(previous, source, pow, timestamp);
+    public final ReceiveRequest withPrevious(TxId previous) {
+        return new ReceiveRequest(previous, source, pow, timestamp);
     }
 
-    public final TxId source() {
+    public final AccountTxId source() {
         return source;
     }
 
-    public final ReceiveEvent withSource(TxId source) {
-        return new ReceiveEvent(previous, source, pow, timestamp);
+    public final ReceiveRequest withSource(AccountTxId source) {
+        return new ReceiveRequest(previous, source, pow, timestamp);
     }
 
     @Override
@@ -54,8 +55,8 @@ public final class ReceiveEvent extends Event {
     }
 
     @Override
-    public final ReceiveEvent withPow(long pow) {
-        return new ReceiveEvent(previous, source, pow, timestamp);
+    public final ReceiveRequest withPow(long pow) {
+        return new ReceiveRequest(previous, source, pow, timestamp);
     }
 
     @Override
@@ -64,8 +65,8 @@ public final class ReceiveEvent extends Event {
     }
 
     @Override
-    public final ReceiveEvent withTimestamp(Instant timestamp) {
-        return new ReceiveEvent(previous, source, pow, timestamp);
+    public final ReceiveRequest withTimestamp(Instant timestamp) {
+        return new ReceiveRequest(previous, source, pow, timestamp);
     }
 
     public static Builder builder() {
@@ -73,7 +74,7 @@ public final class ReceiveEvent extends Event {
     }
 
     public final Builder toBuilder() {
-        return ReceiveEvent.builder().previous(previous).source(source).pow(pow).timestamp(timestamp);
+        return ReceiveRequest.builder().previous(previous).source(source).pow(pow).timestamp(timestamp);
     }
 
     @Override
@@ -87,7 +88,7 @@ public final class ReceiveEvent extends Event {
         if (getClass() != o.getClass()) {
             return false;
         }
-        ReceiveEvent that = (ReceiveEvent) o;
+        ReceiveRequest that = (ReceiveRequest) o;
         return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
     }
 
@@ -98,14 +99,14 @@ public final class ReceiveEvent extends Event {
 
     @Override
     public final String toString() {
-        return "ReceiveEvent{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+        return "ReceiveRequest{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
     }
 
     public static final class Builder {
 
         public TxId previous;
 
-        public TxId source;
+        public AccountTxId source;
 
         public long pow;
 
@@ -120,11 +121,11 @@ public final class ReceiveEvent extends Event {
             return this;
         }
 
-        public final TxId source() {
+        public final AccountTxId source() {
             return source;
         }
 
-        public final Builder source(TxId source) {
+        public final Builder source(AccountTxId source) {
             this.source = source;
             return this;
         }
@@ -147,8 +148,8 @@ public final class ReceiveEvent extends Event {
             return this;
         }
 
-        public final ReceiveEvent build() {
-            return new ReceiveEvent(previous, source, pow, timestamp);
+        public final ReceiveRequest build() {
+            return new ReceiveRequest(previous, source, pow, timestamp);
         }
 
         @Override
@@ -162,7 +163,7 @@ public final class ReceiveEvent extends Event {
             if (getClass() != o.getClass()) {
                 return false;
             }
-            ReceiveEvent.Builder that = (ReceiveEvent.Builder) o;
+            ReceiveRequest.Builder that = (ReceiveRequest.Builder) o;
             return java.util.Objects.equals(this.previous, that.previous) && java.util.Objects.equals(this.source, that.source) && java.util.Objects.equals(this.pow, that.pow) && java.util.Objects.equals(this.timestamp, that.timestamp);
         }
 
@@ -173,7 +174,7 @@ public final class ReceiveEvent extends Event {
 
         @Override
         public final String toString() {
-            return "ReceiveEvent.Builder{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
+            return "ReceiveRequest.Builder{previous = " + this.previous + ", source = " + this.source + ", pow = " + this.pow + ", timestamp = " + this.timestamp + "}";
         }
     }
 }
