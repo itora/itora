@@ -193,7 +193,7 @@ public final class AccountManagerImpl implements AccountManager {
         Account account = previous.account();
         Chain chain = lattice.chains.get(account);
         for (Tx tx : Chains.iterate(chain)) {
-            if (previous.equals(tx.txId())) {
+            if (previous.txId.equals(tx.txId())) {
                 foundTx = tx;
                 // We could also get back to the OpenTx
                 break;
