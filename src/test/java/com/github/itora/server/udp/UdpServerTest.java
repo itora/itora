@@ -69,7 +69,7 @@ public class UdpServerTest {
     }
     
     @Test
-    public void shouldSendAndReceiveRequest() throws Exception {
+    public void shouldSendAndReceiveRequest() {
 		AsymmetricKey keyEN = Cryptos.generate();
 		AsymmetricKey keyS = Cryptos.generate();
 
@@ -84,11 +84,15 @@ public class UdpServerTest {
         SignedPowRequest sentRequest = Requests.sign(PowRequest.Factory.powRequest(send, pow), keyEN.privateKey());
 		leftUdpServer.send(new Address(Address.LOCALHOST, rightUdpServer.port()), sentRequest);
 		
-		SignedPowRequest receivedRequest = rightRequests.takeFirst();
+		SignedPowRequest receivedRequest;
+		try {
+			receivedRequest = rightRequests.takeFirst();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
         Assertions.assertThat(Requests.verify(receivedRequest, keyEN.publicKey)).isTrue();
 		Assertions.assertThat(receivedRequest.powRequest().pow()).isEqualTo(pow);
 		Assertions.assertThat(receivedRequest.powRequest().request()).isEqualTo(send);
-		Thread.sleep(1000);
     }
 
 }
