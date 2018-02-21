@@ -8,6 +8,7 @@ import java.util.function.Function;
 import com.github.itora.account.Account;
 import com.github.itora.account.AccountChain;
 import com.github.itora.account.AccountManager;
+import com.github.itora.account.Accounts;
 import com.github.itora.account.internal.BlockValiditation.Status;
 import com.github.itora.amount.Amount;
 import com.github.itora.amount.Amounts;
@@ -101,7 +102,7 @@ public final class AccountManagerImpl implements AccountManager {
 
                 Amount newBalance = Amounts.minus(accountChain.balance, request.amount());
 
-                if (Amounts.isStrictlyNegative(newBalance)) {
+                if (Amounts.isStrictlyNegative(newBalance) && !Accounts.EX_NIHILO.equals(account)) {
                     return accountChain; // reject send, lacking funds
                 }
 

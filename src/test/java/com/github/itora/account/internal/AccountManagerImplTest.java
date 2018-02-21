@@ -3,6 +3,7 @@ package com.github.itora.account.internal;
 import java.time.Instant;
 
 import com.github.itora.account.Account;
+import com.github.itora.account.Accounts;
 import com.github.itora.amount.Amount;
 import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.crypto.AsymmetricKey;
@@ -29,11 +30,10 @@ public class AccountManagerImplTest {
     public void setUp() throws Exception {
         accountManager = new AccountManagerImpl(LatticeBootstrap.EMPTY);
 
-        AsymmetricKey keyEN = Cryptos.generate();
         AsymmetricKey keyS = Cryptos.generate();
         AsymmetricKey keyD = Cryptos.generate();
 
-        accountEN = Account.Factory.account(keyEN.publicKey());
+        accountEN = Accounts.EX_NIHILO;
         accountS = Account.Factory.account(keyS.publicKey());
         accountD = Account.Factory.account(keyD.publicKey());
     }
