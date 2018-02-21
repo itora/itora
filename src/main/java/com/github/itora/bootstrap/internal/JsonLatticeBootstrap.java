@@ -1,7 +1,7 @@
 package com.github.itora.bootstrap.internal;
 
+import com.github.itora.account.Lattice;
 import com.github.itora.bootstrap.LatticeBootstrap;
-import com.github.itora.chain.Lattice;
 
 public final class JsonLatticeBootstrap implements LatticeBootstrap {
 

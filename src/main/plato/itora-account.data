@@ -1,7 +1,19 @@
 model com.github.itora.account
 
+import java:com.github.itora.amount#Amount
 import java:com.github.itora.crypto#PublicKey
+import java:com.github.itora.chain#Chain
+import java:com.github.andrewoma.dexx.collection#Map
 
 type Account {
     val key: PublicKey 
+}
+
+type AccountChain {
+    val chain: Chain
+    val balance: Amount
+}
+
+type Lattice {
+    val chains: Map[Account, AccountChain]
 }
