@@ -62,9 +62,8 @@ public final class RegularSignedEventSerializer implements SignedEventSerializer
 	
 	@Override
 	public ByteBuffer serialize(SignedEvent event) {
-		ByteBuffer buffer = new RegularEventSerializer().serialize(event.event());
 		return build(
-			new ByteBufferToByteBuffer(buffer),
+			new ByteBufferToByteBuffer(new RegularEventSerializer().serialize(event.event())),
 			new ByteArrayToByteBuffer(event.signature().value())
 		);
 	}
@@ -78,6 +77,9 @@ public final class RegularSignedEventSerializer implements SignedEventSerializer
 	
 	@Override
 	public SignedEvent deserialize(ByteBuffer buffer) {
-		return new SignedEvent(new RegularEventSerializer().deserialize(buffer), Signature.Factory.signature(byteArrayFrom(buffer)));
+		return new SignedEvent(
+			new RegularEventSerializer().deserialize(buffer),
+			Signature.Factory.signature(byteArrayFrom(buffer))
+		);
 	}
 }
