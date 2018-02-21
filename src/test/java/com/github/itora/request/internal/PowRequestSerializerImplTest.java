@@ -13,31 +13,27 @@ import com.github.itora.crypto.AsymmetricKeys;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.PowRequest;
 import com.github.itora.request.ReceiveRequest;
-import com.github.itora.request.RegularSignedPowRequestSerializer;
+import com.github.itora.request.RegularPowRequestSerializer;
 import com.github.itora.request.Request;
-import com.github.itora.request.Requests;
 import com.github.itora.request.SendRequest;
-import com.github.itora.request.SignedPowRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxIds;
 import com.github.itora.util.ByteArray;
 
-public class SignedPowRequestSerializerImplTest {
+public class PowRequestSerializerImplTest {
 
-    private RegularSignedPowRequestSerializer requestSerializer;
+    private RegularPowRequestSerializer requestSerializer;
 
     @Before
     public void setUp() throws Exception {
-        requestSerializer = new RegularSignedPowRequestSerializer();
+        requestSerializer = new RegularPowRequestSerializer();
     }
 
     private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
     	ByteArray pow = AsymmetricKeys.random(100);
     	PowRequest pr = PowRequest.Factory.powRequest(request, pow);
-        SignedPowRequest spr = Requests.sign(pr, k.privateKey());
-        SignedPowRequest result = requestSerializer.deserialize(requestSerializer.serialize(spr));
-        Assertions.assertThat(Requests.verify(result, k.publicKey)).isTrue();
-        Assertions.assertThat(result).isEqualTo(spr);
+        PowRequest result = requestSerializer.deserialize(requestSerializer.serialize(pr));
+        Assertions.assertThat(result).isEqualTo(pr);
     }
 
     @Test
