@@ -18,15 +18,14 @@ type OpenRequest {
 }
 
 type SendRequest {
-    val previous: TxId
-    val from: Account
-    val to: Account
+    val previous: AccountTxId
+    val destination: Account
     val amount: Amount
     val timestamp: Instant
 }
 
 type ReceiveRequest {
-    val previous: TxId
+    val previous: AccountTxId
     val source: AccountTxId
     val timestamp: Instant
 }

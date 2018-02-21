@@ -2,17 +2,16 @@ package com.github.itora.request;
 
 import com.github.itora.tx.AccountTxId;
 import java.time.Instant;
-import com.github.itora.tx.TxId;
 
 public final class ReceiveRequest extends Request {
 
-    public final TxId previous;
+    public final AccountTxId previous;
 
     public final AccountTxId source;
 
     public final Instant timestamp;
 
-    public ReceiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
+    public ReceiveRequest(AccountTxId previous, AccountTxId source, Instant timestamp) {
         this.previous = previous;
         this.source = source;
         this.timestamp = timestamp;
@@ -20,7 +19,7 @@ public final class ReceiveRequest extends Request {
 
     public interface Factory {
 
-        public static ReceiveRequest receiveRequest(TxId previous, AccountTxId source, Instant timestamp) {
+        public static ReceiveRequest receiveRequest(AccountTxId previous, AccountTxId source, Instant timestamp) {
             return new ReceiveRequest(previous, source, timestamp);
         }
     }
@@ -30,11 +29,11 @@ public final class ReceiveRequest extends Request {
         return visitor.visitReceiveRequest(this);
     }
 
-    public final TxId previous() {
+    public final AccountTxId previous() {
         return previous;
     }
 
-    public final ReceiveRequest withPrevious(TxId previous) {
+    public final ReceiveRequest withPrevious(AccountTxId previous) {
         return new ReceiveRequest(previous, source, timestamp);
     }
 
@@ -91,17 +90,17 @@ public final class ReceiveRequest extends Request {
 
     public static final class Builder {
 
-        public TxId previous;
+        public AccountTxId previous;
 
         public AccountTxId source;
 
         public Instant timestamp;
 
-        public final TxId previous() {
+        public final AccountTxId previous() {
             return previous;
         }
 
-        public final Builder previous(TxId previous) {
+        public final Builder previous(AccountTxId previous) {
             this.previous = previous;
             return this;
         }

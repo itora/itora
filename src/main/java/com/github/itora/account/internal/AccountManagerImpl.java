@@ -29,6 +29,25 @@ public final class AccountManagerImpl implements AccountManager {
 
     private final AtomicReference<Lattice> lattice = new AtomicReference<>(Lattices.EMPTY);
 
+    private final static Tx.Visitor<Optional<Amount>> SENT_AMOUNT_VISITOR = new Tx.Visitor<Optional<Amount>>() {
+
+        @Override
+        public Optional<Amount> visitOpenTx(OpenTx openTx) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Amount> visitSendTx(SendTx sendTx) {
+            return Optional.of(sendTx.amount);
+        }
+
+        @Override
+        public Optional<Amount> visitReceiveTx(ReceiveTx receiveTx) {
+            return Optional.empty();
+        }
+
+    };
+
     public AccountManagerImpl(LatticeBootstrap latticeBootstrap) {
         lattice.set(latticeBootstrap.bootstrap());
     }
@@ -73,12 +92,6 @@ public final class AccountManagerImpl implements AccountManager {
             public Lattice visitOpenRequest(OpenRequest request) {
                 TxId txId = TxIds.txId(request);
 
-                // Check if this block was already processed!
-                Block thisBlock = findBlock(lattice, txId);
-                if (thisBlock != null) {
-                    return lattice;
-                }
-
                 Account account = request.account();
                 Chain previous = lattice.chains.get(account);
 
@@ -108,9 +121,16 @@ public final class AccountManagerImpl implements AccountManager {
 
                 AccountTxId source = request.source();
 
-                Amount amount = findAmount(lattice, source);
+                Optional<Tx> mbTx = findTx(lattice, source);
 
-                Tx tx = Tx.Factory.receiveTx(txId, amount, request.timestamp());
+                Amount sentAmount = mbTx.flatMap(tx -> Tx.visit(tx, SENT_AMOUNT_VISITOR)).orElse(null);
+                
+                if (sentAmount == null) {
+                    // TODO buffer request!
+                    return lattice;
+                }
+
+                Tx tx = Tx.Factory.receiveTx(txId, sentAmount, request.timestamp());
                 Chain previous = lattice.chains.get(previousBlock.account);
 
                 return add(previousBlock.account, previous, tx);
@@ -127,9 +147,9 @@ public final class AccountManagerImpl implements AccountManager {
 
                 TxId txId = TxIds.txId(request);
 
-                Account account = request.from();
+                Account account = request.previous.account;
 
-                Tx tx = Tx.Factory.sendTx(txId, request.to(), request.amount(), request.timestamp());
+                Tx tx = Tx.Factory.sendTx(txId, request.destination(), request.amount(), request.timestamp());
                 Chain previous = lattice.chains.get(account);
                 return add(account, previous, tx);
 
@@ -143,41 +163,17 @@ public final class AccountManagerImpl implements AccountManager {
         });
     }
 
-    private static Amount findAmount(Lattice lattice, AccountTxId accountTxId) {
-        Amount amount = null;
+    private static Optional<Tx> findTx(Lattice lattice, AccountTxId accountTxId) {
         Chain chain = lattice.chains().get(accountTxId.account());
         for (Tx tx : Chains.iterate(chain)) {
             if (accountTxId.txId().equals(tx.txId())) {
-                Optional<Amount> a = Tx.visit(tx, new Tx.Visitor<Optional<Amount>>() {
-                    @Override
-                    public Optional<Amount> visitOpenTx(OpenTx tx) {
-                        return Optional.empty();
-                    }
-
-                    @Override
-                    public Optional<Amount> visitReceiveTx(ReceiveTx tx) {
-                        return Optional.empty();
-                    }
-
-                    @Override
-                    public Optional<Amount> visitSendTx(SendTx tx) {
-                        return Optional.of(tx.amount());
-                    }
-                });
-
-                amount = a.get();
-                break;
-            }
-
-            if (amount != null) {
-                break;
+                return Optional.of(tx);
             }
         }
-        return amount;
-
+        return Optional.empty();
     }
 
-    private static BlockValiditation checkBlockValidity(Lattice lattice, TxId previous) {
+    private static BlockValiditation checkBlockValidity(Lattice lattice, AccountTxId previous) {
         // TODO handle block de-duplication
         Block previousBlock = findBlock(lattice, previous);
 
@@ -192,26 +188,18 @@ public final class AccountManagerImpl implements AccountManager {
         return BlockValiditation.accepted(previousBlock);
     }
 
-    private static Block findBlock(Lattice lattice, TxId txId) {
+    private static Block findBlock(Lattice lattice, AccountTxId previous) {
         Tx foundTx = null;
-        Account foundAccount = null;
-        Chain foundChain = null;
-        for (java.util.Map.Entry<Account, Chain> entry : lattice.chains.asMap().entrySet()) {
-            Chain chain = entry.getValue();
-            for (Tx tx : Chains.iterate(chain)) {
-                if (txId.equals(tx.txId())) {
-                    foundAccount = entry.getKey();
-                    foundTx = tx;
-                    foundChain = chain;
-                    // We could also get back to the OpenTx
-                    break;
-                }
-            }
-            if (foundAccount != null) {
+        Account account = previous.account();
+        Chain chain = lattice.chains.get(account);
+        for (Tx tx : Chains.iterate(chain)) {
+            if (previous.equals(tx.txId())) {
+                foundTx = tx;
+                // We could also get back to the OpenTx
                 break;
             }
         }
-        return foundTx == null ? null : new Block(foundAccount, foundChain, foundTx, txId);
+        return foundTx == null ? null : new Block(account, chain, foundTx, previous.txId());
     }
 
 }
