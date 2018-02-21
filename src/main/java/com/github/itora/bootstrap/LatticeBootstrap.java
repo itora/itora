@@ -1,7 +1,7 @@
 package com.github.itora.bootstrap;
 
-import com.github.itora.chain.Lattice;
-import com.github.itora.chain.Lattices;
+import com.github.itora.account.Lattice;
+import com.github.itora.account.Lattices;
 
 public interface LatticeBootstrap {
     

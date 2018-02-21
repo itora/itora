@@ -1,9 +1,12 @@
 package com.github.itora.account.internal;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import com.github.itora.account.Account;
+import com.github.itora.account.AccountChain;
 import com.github.itora.account.AccountManager;
 import com.github.itora.account.internal.BlockValiditation.Status;
 import com.github.itora.amount.Amount;
@@ -11,11 +14,10 @@ import com.github.itora.amount.Amounts;
 import com.github.itora.bootstrap.LatticeBootstrap;
 import com.github.itora.chain.Chain;
 import com.github.itora.chain.Chains;
-import com.github.itora.chain.Lattice;
-import com.github.itora.chain.Lattices;
-import com.github.itora.request.Request;
 import com.github.itora.request.OpenRequest;
 import com.github.itora.request.ReceiveRequest;
+import com.github.itora.request.Request;
+import com.github.itora.request.Requests;
 import com.github.itora.request.SendRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.OpenTx;
@@ -27,7 +29,7 @@ import com.github.itora.tx.TxIds;
 
 public final class AccountManagerImpl implements AccountManager {
 
-    private final AtomicReference<Lattice> lattice = new AtomicReference<>(Lattices.EMPTY);
+    private final ConcurrentMap<Account, AccountChain> lattice;
 
     private final static Tx.Visitor<Optional<Amount>> SENT_AMOUNT_VISITOR = new Tx.Visitor<Optional<Amount>>() {
 
@@ -49,133 +51,119 @@ public final class AccountManagerImpl implements AccountManager {
     };
 
     public AccountManagerImpl(LatticeBootstrap latticeBootstrap) {
-        lattice.set(latticeBootstrap.bootstrap());
+        lattice = new ConcurrentHashMap<>(latticeBootstrap.bootstrap().chains().asMap());
     }
 
     public Amount balance(Account account) {
-        return balance(account, lattice.get());
-    }
-
-    public static Amount balance(Account account, Lattice lattice) {
-        Amount sum = Amounts.ZERO;
-        for (Tx tx : Chains.iterate(lattice.chains.get(account))) {
-            sum = Amounts.plus(sum, Tx.visit(tx, new Tx.Visitor<Amount>() {
-                @Override
-                public Amount visitOpenTx(OpenTx tx) {
-                    return Amounts.ZERO;
-                }
-
-                @Override
-                public Amount visitReceiveTx(ReceiveTx tx) {
-                    return tx.amount();
-                }
-
-                @Override
-                public Amount visitSendTx(SendTx tx) {
-                    return Amounts.minus(tx.amount());
-                }
-            }));
+        AccountChain accountChain = lattice.get(account);
+        if (accountChain != null) {
+            return accountChain.balance;
         }
-        return sum;
+        return Amounts.ZERO;
     }
 
     @Override
     public void accept(Request request) {
-        lattice.getAndUpdate(currentLattice -> accept(request, currentLattice));
+        Account account = Requests.emitter(request);
+        lattice.compute(account, (k, v) -> accept(request, account, v, lattice::get));
     }
 
-    public static Lattice accept(Request request, Lattice lattice) {
+    public static AccountChain accept(Request request, Account account, AccountChain accountChain,
+            Function<Account, AccountChain> accountToChain) {
         // TODO Check the request validity
-        return Request.visit(request, new Request.Visitor<Lattice>() {
+        return Request.visit(request, new Request.Visitor<AccountChain>() {
 
             @Override
-            public Lattice visitOpenRequest(OpenRequest request) {
+            public AccountChain visitOpenRequest(OpenRequest request) {
                 TxId txId = TxIds.txId(request);
 
-                Account account = request.account();
-                Chain previous = lattice.chains.get(account);
-
                 // A chain must be inexistent or the open request is ignored
-                if (previous != null) {
-                    return lattice;
+                if (accountChain != null) {
+                    return accountChain;
                 }
 
                 Tx tx = Tx.Factory.openTx(txId, request.timestamp());
 
                 Chain chain = Chain.Factory.chainLink(Chains.ROOT, tx);
-
-                return lattice.withChains(lattice.chains().put(account, chain));
+                return AccountChain.Factory.accountChain(chain, Amounts.ZERO);
             }
 
             @Override
-            public Lattice visitReceiveRequest(ReceiveRequest request) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, request.previous);
+            public AccountChain visitSendRequest(SendRequest request) {
+                BlockValiditation previousBlockValidation = checkBlockValidity(accountChain.chain, request.previous);
 
                 if (previousBlockValidation.status != Status.ACCEPTED) {
                     System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
-                    return lattice;
+                    return accountChain;
                 }
 
-                Block previousBlock = previousBlockValidation.block;
+                // Check balance!
+
+                Amount newBalance = Amounts.minus(accountChain.balance, request.amount());
+
+                if (Amounts.isStrictlyNegative(newBalance)) {
+                    return accountChain; // reject send, lacking funds
+                }
+
+                TxId txId = TxIds.txId(request);
+
+                Tx tx = Tx.Factory.sendTx(txId, request.destination(), request.amount(), request.timestamp());
+
+                Chain chain = Chain.Factory.chainLink(accountChain.chain, tx);
+                AccountChain accountChain = AccountChain.Factory.accountChain(chain, newBalance);
+
+                return accountChain;
+            }
+
+            @Override
+            public AccountChain visitReceiveRequest(ReceiveRequest request) {
+                BlockValiditation previousBlockValidation = checkBlockValidity(accountChain.chain, request.previous);
+
+                if (previousBlockValidation.status != Status.ACCEPTED) {
+                    System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
+                    return accountChain;
+                }
+
                 TxId txId = TxIds.txId(request);
 
                 AccountTxId source = request.source();
 
-                Optional<Tx> mbTx = findTx(lattice, source);
+                Optional<Tx> mbTx = findTx(source, accountToChain);
 
                 Amount sentAmount = mbTx.flatMap(tx -> Tx.visit(tx, SENT_AMOUNT_VISITOR)).orElse(null);
-                
+
                 if (sentAmount == null) {
                     // TODO buffer request!
-                    return lattice;
+                    return accountChain;
                 }
 
                 Tx tx = Tx.Factory.receiveTx(txId, sentAmount, request.timestamp());
-                Chain previous = lattice.chains.get(previousBlock.account);
 
-                return add(previousBlock.account, previous, tx);
+                Chain chain = Chain.Factory.chainLink(accountChain.chain, tx);
+                AccountChain updatedAccountChain = AccountChain.Factory.accountChain(chain, Amounts.plus(accountChain.balance, sentAmount));
+
+                return updatedAccountChain;
             }
 
-            @Override
-            public Lattice visitSendRequest(SendRequest request) {
-                BlockValiditation previousBlockValidation = checkBlockValidity(lattice, request.previous);
-
-                if (previousBlockValidation.status != Status.ACCEPTED) {
-                    System.out.println("Block was rejected with cause: " + previousBlockValidation.status);
-                    return lattice;
-                }
-
-                TxId txId = TxIds.txId(request);
-
-                Account account = request.previous.account;
-
-                Tx tx = Tx.Factory.sendTx(txId, request.destination(), request.amount(), request.timestamp());
-                Chain previous = lattice.chains.get(account);
-                return add(account, previous, tx);
-
-            }
-
-            private Lattice add(Account account, Chain previous, Tx tx) {
-                Chain chain = Chain.Factory.chainLink(previous, tx);
-
-                return lattice.withChains(lattice.chains().put(account, chain));
-            }
         });
     }
 
-    private static Optional<Tx> findTx(Lattice lattice, AccountTxId accountTxId) {
-        Chain chain = lattice.chains().get(accountTxId.account());
-        for (Tx tx : Chains.iterate(chain)) {
-            if (accountTxId.txId().equals(tx.txId())) {
-                return Optional.of(tx);
+    private static Optional<Tx> findTx(AccountTxId accountTxId, Function<Account, AccountChain> accountToChain) {
+        AccountChain accountChain = accountToChain.apply(accountTxId.account);
+        if (accountChain != null) {
+            Chain chain = accountChain.chain;
+            for (Tx tx : Chains.iterate(chain)) {
+                if (accountTxId.txId().equals(tx.txId())) {
+                    return Optional.of(tx);
+                }
             }
         }
         return Optional.empty();
     }
 
-    private static BlockValiditation checkBlockValidity(Lattice lattice, AccountTxId previous) {
+    private static BlockValiditation checkBlockValidity(Chain chain, AccountTxId previous) {
         // TODO handle block de-duplication
-        Block previousBlock = findBlock(lattice, previous);
+        Block previousBlock = findBlock(chain, previous);
 
         if (previousBlock == null) {
             // Dangling block?!
@@ -188,18 +176,14 @@ public final class AccountManagerImpl implements AccountManager {
         return BlockValiditation.accepted(previousBlock);
     }
 
-    private static Block findBlock(Lattice lattice, AccountTxId previous) {
-        Tx foundTx = null;
+    private static Block findBlock(Chain chain, AccountTxId previous) {
         Account account = previous.account();
-        Chain chain = lattice.chains.get(account);
         for (Tx tx : Chains.iterate(chain)) {
             if (previous.txId.equals(tx.txId())) {
-                foundTx = tx;
-                // We could also get back to the OpenTx
-                break;
+                return new Block(account, chain, tx, previous.txId());
             }
         }
-        return foundTx == null ? null : new Block(account, chain, foundTx, previous.txId());
+        return null;
     }
 
 }

@@ -1,28 +1,27 @@
-package com.github.itora.chain;
+package com.github.itora.account;
 
-import com.github.itora.account.Account;
 import com.github.andrewoma.dexx.collection.Map;
 
 public final class Lattice {
 
-    public final Map<Account, Chain> chains;
+    public final Map<Account, AccountChain> chains;
 
-    public Lattice(Map<Account, Chain> chains) {
+    public Lattice(Map<Account, AccountChain> chains) {
         this.chains = chains;
     }
 
     public interface Factory {
 
-        public static Lattice lattice(Map<Account, Chain> chains) {
+        public static Lattice lattice(Map<Account, AccountChain> chains) {
             return new Lattice(chains);
         }
     }
 
-    public final Map<Account, Chain> chains() {
+    public final Map<Account, AccountChain> chains() {
         return chains;
     }
 
-    public final Lattice withChains(Map<Account, Chain> chains) {
+    public final Lattice withChains(Map<Account, AccountChain> chains) {
         return new Lattice(chains);
     }
 
@@ -61,13 +60,13 @@ public final class Lattice {
 
     public static final class Builder {
 
-        public Map<Account, Chain> chains;
+        public Map<Account, AccountChain> chains;
 
-        public final Map<Account, Chain> chains() {
+        public final Map<Account, AccountChain> chains() {
             return chains;
         }
 
-        public final Builder chains(Map<Account, Chain> chains) {
+        public final Builder chains(Map<Account, AccountChain> chains) {
             this.chains = chains;
             return this;
         }

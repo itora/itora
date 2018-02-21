@@ -10,7 +10,11 @@ public final class Amounts {
 		return new Amount(a.value + b.value);
 	}
 
-	public static Amount minus(Amount a) {
-		return new Amount(-a.value);
+	public static Amount minus(Amount a, Amount b) {
+		return new Amount(a.value - b.value);
+	}
+	
+	public static boolean isStrictlyNegative(Amount a) {
+	    return a.value < 0L;
 	}
 }
