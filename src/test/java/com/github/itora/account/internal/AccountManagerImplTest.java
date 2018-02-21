@@ -46,9 +46,10 @@ public class AccountManagerImplTest {
 
         accountManager.accept(openEN, openS, openD);
 
-        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L),
+        SendRequest sendENtoS = Request.Factory.sendRequest(AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(openEN)),
+                accountS, Amount.Factory.amount(30_000L),
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(AccountTxId.Factory.accountTxId(accountS, TxIds.txId(openS)),
                 AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 Instant.EPOCH.plusSeconds(300_000L));
 
@@ -56,7 +57,9 @@ public class AccountManagerImplTest {
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendRequest sendStoD = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+        SendRequest sendStoD = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(receiveSfromEN)),
+                accountD, Amount.Factory.amount(5_000L),
 
                 Instant.EPOCH.plusSeconds(400_000L));
 
@@ -65,7 +68,8 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(
+                AccountTxId.Factory.accountTxId(accountD, TxIds.txId(openD)),
                 AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD)),
                 Instant.EPOCH.plusSeconds(500_000L));
 
@@ -83,9 +87,12 @@ public class AccountManagerImplTest {
 
         accountManager.accept(openEN, openS, openD);
 
-        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L),
+        SendRequest sendENtoS = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(openEN)),
+                accountS, Amount.Factory.amount(30_000L),
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(openS)),
                 AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 Instant.EPOCH.plusSeconds(300_000L));
 
@@ -95,7 +102,9 @@ public class AccountManagerImplTest {
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendRequest sendStoD = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+        SendRequest sendStoD = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(receiveSfromEN)),
+                accountD, Amount.Factory.amount(5_000L),
 
                 Instant.EPOCH.plusSeconds(400_000L));
 
@@ -105,7 +114,8 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(
+                AccountTxId.Factory.accountTxId(accountD, TxIds.txId(openD)),
                 AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD)),
                 Instant.EPOCH.plusSeconds(500_000L));
 
@@ -125,9 +135,12 @@ public class AccountManagerImplTest {
 
         accountManager.accept(openEN, openS, openD);
 
-        SendRequest sendENtoS = Request.Factory.sendRequest(TxIds.txId(openEN), accountEN, accountS, Amount.Factory.amount(30_000L),
+        SendRequest sendENtoS = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(openEN)),
+                accountS, Amount.Factory.amount(30_000L),
                 Instant.EPOCH.plusSeconds(200_000L));
-        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(TxIds.txId(openS),
+        ReceiveRequest receiveSfromEN = Request.Factory.receiveRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(openS)),
                 AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(sendENtoS)),
                 Instant.EPOCH.plusSeconds(300_000L));
 
@@ -135,10 +148,14 @@ public class AccountManagerImplTest {
 
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(30_000L));
 
-        SendRequest sendStoD1 = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(5_000L),
+        SendRequest sendStoD1 = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(receiveSfromEN)),
+                accountD, Amount.Factory.amount(5_000L),
 
                 Instant.EPOCH.plusSeconds(400_000L));
-        SendRequest sendStoD2 = Request.Factory.sendRequest(TxIds.txId(receiveSfromEN), accountS, accountD, Amount.Factory.amount(6_000L),
+        SendRequest sendStoD2 = Request.Factory.sendRequest(
+                AccountTxId.Factory.accountTxId(accountS, TxIds.txId(receiveSfromEN)),
+                accountD, Amount.Factory.amount(6_000L),
 
                 Instant.EPOCH.plusSeconds(400_000L));
 
@@ -148,7 +165,8 @@ public class AccountManagerImplTest {
         Assertions.assertThat(accountManager.balance(accountS)).isEqualTo(Amount.Factory.amount(25_000L));
         Assertions.assertThat(accountManager.balance(accountD)).isEqualTo(Amount.Factory.amount(0L));
 
-        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(TxIds.txId(openD),
+        ReceiveRequest receiveDfromS = Request.Factory.receiveRequest(
+                AccountTxId.Factory.accountTxId(accountD, TxIds.txId(openD)),
                 AccountTxId.Factory.accountTxId(accountS, TxIds.txId(sendStoD1)),
                 Instant.EPOCH.plusSeconds(500_000L));
 
