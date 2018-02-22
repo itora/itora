@@ -39,7 +39,8 @@ public final class Cryptos {
     	return new ByteArray(bytes);
     }
 
-    public static ByteArray hash(ConsumableByteArray buffer) {
+    public static ByteArray hash(ByteArray b) {
+    	ConsumableByteArray buffer = new ConsumableByteArray(b);
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256", "BC");
             buffer.consume(new ConsumableByteArray.Consumer() {
