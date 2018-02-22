@@ -18,8 +18,8 @@ import com.davfx.ninio.core.Nop;
 import com.davfx.ninio.core.UdpSocket;
 import com.davfx.ninio.util.Wait;
 import com.github.itora.request.RegularSignedPowRequestSerializer;
-import com.github.itora.request.SignedPowRequest;
 import com.github.itora.request.SignedPowRequestSerializer;
+import com.github.itora.util.ProducingByteArray;
 
 public final class UdpServer {
 
@@ -41,7 +41,7 @@ public final class UdpServer {
 					port = ss.getLocalPort();
 				}
 			} catch (IOException ioe) {
-				LOGGER.error("Udp server failed", ioe);
+				LOGGER.error("Server failed", ioe);
 				waitForClose.run();
 				connecter = null;
 				actualPortToListen = 0;
@@ -60,18 +60,18 @@ public final class UdpServer {
 		connecter.connect(new Connection() {
 			@Override
 			public void failed(IOException ioe) {
-				LOGGER.error("Udp server failed", ioe);
+				LOGGER.error("Server failed", ioe);
 				waitForOpen.run();
 				waitForClose.run();
 			}
 			@Override
 			public void connected(Address address) {
-				LOGGER.debug("Udp server ready");
+				LOGGER.debug("Server ready");
 				waitForOpen.run();
 			}
 			@Override
 			public void closed() {
-				LOGGER.debug("Udp server closed");
+				LOGGER.debug("Server closed");
 				waitForOpen.run();
 				waitForClose.run();
 			}
@@ -79,7 +79,7 @@ public final class UdpServer {
 			@Override
 			public void received(Address address, ByteBuffer buffer) {
 				LOGGER.trace("Received {} bytes from {}", buffer.remaining(), address);
-				callback.accept(serializer.deserialize(buffer));
+				callback.accept(serializer.deserialize(new ProducingByteArray().produceBytes(buffer.array(), buffer.position(), buffer.remaining()).finish()));
 			}
 		});
 

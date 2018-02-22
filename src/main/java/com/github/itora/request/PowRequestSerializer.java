@@ -1,8 +1,9 @@
 package com.github.itora.request;
 
-import java.nio.ByteBuffer;
+import com.github.itora.pow.Powed;
+import com.github.itora.util.ByteArray;
 
 public interface PowRequestSerializer {
-	ByteBuffer serialize(PowRequest request);
-	PowRequest deserialize(ByteBuffer buffer);
+	ByteArray serialize(Powed<Request> request);
+	Powed<Request> deserialize(ByteArray buffer);
 }
