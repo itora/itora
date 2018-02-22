@@ -43,27 +43,32 @@ public final class ProducingByteArray {
 		return current;
 	}
 	
-	public void produceByte(byte value) {
+	public ProducingByteArray produceByte(byte value) {
 		check(1).put(value);
+		return this;
 	}
 	
-	public void produceInt(int value) {
+	public ProducingByteArray produceInt(int value) {
 		check(Ints.BYTES).putInt(value);
+		return this;
 	}
 	
-	public void produceLong(long value) {	
+	public ProducingByteArray produceLong(long value) {	
 		check(Longs.BYTES).putLong(value);
+		return this;
 	}
 	
-	public void produceBytes(byte[] value, int position, int length) {
+	public ProducingByteArray produceBytes(byte[] value, int position, int length) {
 		if ((position == 0) && (length == value.length)) {
 			current = null;
 			bytes.add(ByteBuffer.wrap(value));
 		} else {
 			check(length).put(value, position, length);
 		}
+		return this;
 	}
-	public void produceBytes(byte[] value) {
+	public ProducingByteArray produceBytes(byte[] value) {
 		produceBytes(value, 0, value.length);
+		return this;
 	}
 }

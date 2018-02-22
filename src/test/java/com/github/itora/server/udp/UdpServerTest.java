@@ -15,33 +15,33 @@ import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
 import com.github.itora.crypto.Cryptos;
+import com.github.itora.crypto.Signed;
+import com.github.itora.pow.Pow;
+import com.github.itora.pow.Powed;
 import com.github.itora.request.OpenRequest;
-import com.github.itora.request.PowRequest;
 import com.github.itora.request.Request;
 import com.github.itora.request.Requests;
 import com.github.itora.request.SendRequest;
-import com.github.itora.request.SignedPowRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxIds;
-import com.github.itora.util.ByteArray;
 
 public class UdpServerTest {
 
 	private Ninio ninio;
 	
 	private UdpServer leftUdpServer;
-	private LinkedBlockingDeque<SignedPowRequest> leftRequests;
+	private LinkedBlockingDeque<Signed<Powed<Request>>> leftRequests;
 	private UdpServer rightUdpServer;
-	private LinkedBlockingDeque<SignedPowRequest> rightRequests;
+	private LinkedBlockingDeque<Signed<Powed<Request>>> rightRequests;
 	
     @Before
     public void openServers() throws Exception {
     	ninio = Ninio.create();
     	
     	leftRequests = new LinkedBlockingDeque<>();
-    	leftUdpServer = new UdpServer(ninio, 0, new Consumer<SignedPowRequest>() {
+    	leftUdpServer = new UdpServer(ninio, 0, new Consumer<Signed<Powed<Request>>>() {
 			@Override
-			public void accept(SignedPowRequest request) {
+			public void accept(Signed<Powed<Request>> request) {
 				try {
 					leftRequests.putLast(request);
 				} catch (InterruptedException ie) {
@@ -50,9 +50,9 @@ public class UdpServerTest {
 		});
     	
     	rightRequests = new LinkedBlockingDeque<>();
-    	rightUdpServer = new UdpServer(ninio, 0, new Consumer<SignedPowRequest>() {
+    	rightUdpServer = new UdpServer(ninio, 0, new Consumer<Signed<Powed<Request>>>() {
 			@Override
-			public void accept(SignedPowRequest request) {
+			public void accept(Signed<Powed<Request>> request) {
 				try {
 					rightRequests.putLast(request);
 				} catch (InterruptedException ie) {
@@ -80,19 +80,19 @@ public class UdpServerTest {
 		SendRequest send = Request.Factory.sendRequest(AccountTxId.Factory.accountTxId(accountEN, TxIds.txId(open)),
 				accountS, Amount.Factory.amount(30_000L), Instant.EPOCH.plusSeconds(200_000L));
 
-    	ByteArray pow = Cryptos.random(100);
-        SignedPowRequest sentRequest = Requests.sign(PowRequest.Factory.powRequest(send, pow), keyEN.privateKey());
+    	Pow pow = Pow.Factory.pow(Cryptos.random(100));
+    	Signed<Powed<Request>> sentRequest = Requests.sign(Powed.Factory.powed(send, pow), keyEN.privateKey());
 		leftUdpServer.send(new Address(Address.LOCALHOST, rightUdpServer.port()), sentRequest);
 		
-		SignedPowRequest receivedRequest;
+		Signed<Powed<Request>> receivedRequest;
 		try {
 			receivedRequest = rightRequests.takeFirst();
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
         Assertions.assertThat(Requests.verify(receivedRequest, keyEN.publicKey)).isTrue();
-		Assertions.assertThat(receivedRequest.powRequest().pow()).isEqualTo(pow);
-		Assertions.assertThat(receivedRequest.powRequest().request()).isEqualTo(send);
+		Assertions.assertThat(receivedRequest.element().pow()).isEqualTo(pow);
+		Assertions.assertThat(receivedRequest.element().element()).isEqualTo(send);
     }
 
 }

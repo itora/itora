@@ -17,7 +17,10 @@ import com.davfx.ninio.core.Ninio;
 import com.davfx.ninio.core.Nop;
 import com.davfx.ninio.core.UdpSocket;
 import com.davfx.ninio.util.Wait;
+import com.github.itora.crypto.Signed;
+import com.github.itora.pow.Powed;
 import com.github.itora.request.RegularSignedPowRequestSerializer;
+import com.github.itora.request.Request;
 import com.github.itora.request.SignedPowRequestSerializer;
 import com.github.itora.util.ProducingByteArray;
 
@@ -33,7 +36,7 @@ public final class UdpServer {
 	private final Wait waitForClose = new Wait();
 	private final int actualPortToListen;
 
-	public UdpServer(Ninio ninio, int portToListen, Consumer<SignedPowRequest> callback) {
+	public UdpServer(Ninio ninio, int portToListen, Consumer<Signed<Powed<Request>>> callback) {
 		if (portToListen == 0) {
 			int port;
 			try {
@@ -98,10 +101,10 @@ public final class UdpServer {
 		return actualPortToListen;
 	}
 	
-	public void send(Address address, SignedPowRequest request) {
+	public void send(Address address, Signed<Powed<Request>> request) {
 		if (connecter == null) {
 			return;
 		}
-		connecter.send(address, serializer.serialize(request), new Nop());
+		connecter.send(address, ByteBuffer.wrap(serializer.serialize(request).flattened()), new Nop());
 	}
 }
