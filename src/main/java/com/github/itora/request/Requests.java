@@ -23,10 +23,12 @@ public final class Requests {
         }
     };
 
+    //TODO de la merde
     public static Signed<Powed<Request>> sign(Powed<Request> powRequest, PrivateKey privateKey) {
-        return Signed.Factory.signed(powRequest, Cryptos.sign(new RegularRequestSerializer().serialize(powRequest.element), privateKey));
+        return Signed.Factory.signed(powRequest, Cryptos.sign(new RegularRequestSerializer().serialize(powRequest.element()), privateKey));
     }
 
+    //TODO de la merde
     public static boolean verify(Signed<Powed<Request>> request, PublicKey publicKey) {
         return Cryptos.verify(request.signature(), new RegularRequestSerializer().serialize(request.element().element()), publicKey);
     }
