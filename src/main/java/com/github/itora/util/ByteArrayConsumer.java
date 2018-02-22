@@ -3,13 +3,14 @@ package com.github.itora.util;
 import java.nio.ByteBuffer;
 
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
-public final class ConsumableByteArray {
+public final class ByteArrayConsumer {
 	private final ByteArray byteArray;
 	private int next = 0;
 	private ByteBuffer current = null;
 
-	public ConsumableByteArray(ByteArray byteArray) {
+	public ByteArrayConsumer(ByteArray byteArray) {
 		this.byteArray = byteArray;
 	}
 
@@ -36,16 +37,16 @@ public final class ConsumableByteArray {
 	}
 
 	public long consumeLong() {
-		return check(Ints.BYTES).getLong();
+		return check(Longs.BYTES).getLong();
 	}
 	
-	public interface Consumer {
+	public interface Callback {
 		void consume(byte[] b, int position, int length);
 	}
 	
-	public void consume(Consumer consumer, long length) {
+	public void consume(Callback consumer, long length) {
 		while (true) {
-			if (length == 0L) { // Do not break if length == -1L initially
+			if (length == 0L) { // Does not break if length == -1L initially
 				break;
 			}
 			if (current == null) {
@@ -66,7 +67,7 @@ public final class ConsumableByteArray {
 		}
 	}
 	
-	public void consume(Consumer consumer) {
+	public void consume(Callback consumer) {
 		consume(consumer, -1L);
 	}
 }

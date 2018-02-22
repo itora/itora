@@ -9,7 +9,7 @@ import com.github.itora.serialization.Serializations;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxId;
 import com.github.itora.util.ByteArray;
-import com.github.itora.util.ConsumableByteArray;
+import com.github.itora.util.ByteArrayConsumer;
 
 public final class RegularPowRequestSerializer implements PowRequestSerializer {
 	public RegularPowRequestSerializer() {
@@ -56,7 +56,7 @@ public final class RegularPowRequestSerializer implements PowRequestSerializer {
 	
 	@Override
 	public Powed<Request> deserialize(ByteArray b) {
-		ConsumableByteArray buffer = new ConsumableByteArray(b);
+		ByteArrayConsumer buffer = new ByteArrayConsumer(b);
 		switch (RequestKind.requestKindFrom(buffer)) {
 		case OPEN:
 			return Powed.Factory.powed(

@@ -22,7 +22,7 @@ import com.github.itora.pow.Powed;
 import com.github.itora.request.RegularSignedPowRequestSerializer;
 import com.github.itora.request.Request;
 import com.github.itora.request.SignedPowRequestSerializer;
-import com.github.itora.util.ProducingByteArray;
+import com.github.itora.util.ByteArrayProducer;
 
 public final class UdpServer {
 
@@ -82,7 +82,7 @@ public final class UdpServer {
 			@Override
 			public void received(Address address, ByteBuffer buffer) {
 				LOGGER.trace("Received {} bytes from {}", buffer.remaining(), address);
-				callback.accept(serializer.deserialize(new ProducingByteArray().produceBytes(buffer.array(), buffer.position(), buffer.remaining()).finish()));
+				callback.accept(serializer.deserialize(new ByteArrayProducer().produceBytes(buffer.array(), buffer.position(), buffer.remaining()).finish()));
 			}
 		});
 

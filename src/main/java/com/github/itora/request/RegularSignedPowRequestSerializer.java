@@ -11,7 +11,7 @@ import com.github.itora.serialization.Serializations;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxId;
 import com.github.itora.util.ByteArray;
-import com.github.itora.util.ConsumableByteArray;
+import com.github.itora.util.ByteArrayConsumer;
 
 public final class RegularSignedPowRequestSerializer implements SignedPowRequestSerializer {
 	public RegularSignedPowRequestSerializer() {
@@ -61,7 +61,7 @@ public final class RegularSignedPowRequestSerializer implements SignedPowRequest
 	
 	@Override
 	public Signed<Powed<Request>> deserialize(ByteArray b) {
-		ConsumableByteArray buffer = new ConsumableByteArray(b);
+		ByteArrayConsumer buffer = new ByteArrayConsumer(b);
 		switch (RequestKind.requestKindFrom(buffer)) {
 		case OPEN:
 			return Signed.Factory.signed(

@@ -8,11 +8,11 @@ import org.assertj.core.util.Lists;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
-public final class ProducingByteArray {
+public final class ByteArrayProducer {
 	private final List<ByteBuffer> bytes = Lists.newArrayList();
 	private ByteBuffer current = null;
 
-	public ProducingByteArray() {
+	public ByteArrayProducer() {
 	}
 	
 	public ByteArray finish() {
@@ -43,22 +43,22 @@ public final class ProducingByteArray {
 		return current;
 	}
 	
-	public ProducingByteArray produceByte(byte value) {
+	public ByteArrayProducer produceByte(byte value) {
 		check(1).put(value);
 		return this;
 	}
 	
-	public ProducingByteArray produceInt(int value) {
+	public ByteArrayProducer produceInt(int value) {
 		check(Ints.BYTES).putInt(value);
 		return this;
 	}
 	
-	public ProducingByteArray produceLong(long value) {	
+	public ByteArrayProducer produceLong(long value) {	
 		check(Longs.BYTES).putLong(value);
 		return this;
 	}
 	
-	public ProducingByteArray produceBytes(byte[] value, int position, int length) {
+	public ByteArrayProducer produceBytes(byte[] value, int position, int length) {
 		if ((position == 0) && (length == value.length)) {
 			current = null;
 			bytes.add(ByteBuffer.wrap(value));
@@ -67,7 +67,7 @@ public final class ProducingByteArray {
 		}
 		return this;
 	}
-	public ProducingByteArray produceBytes(byte[] value) {
+	public ByteArrayProducer produceBytes(byte[] value) {
 		produceBytes(value, 0, value.length);
 		return this;
 	}
