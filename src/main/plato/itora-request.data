@@ -11,7 +11,6 @@ import java:com.github.itora.util#ByteArray
 
 type Request = OpenRequest | SendRequest | ReceiveRequest
 
-
 type OpenRequest {
     val account: Account
     val timestamp: Instant
@@ -28,18 +27,6 @@ type ReceiveRequest {
     val previous: AccountTxId
     val source: AccountTxId
     val timestamp: Instant
-}
-
-
-type PowRequest {
-    val request: Request
-    val pow: ByteArray
-  
-}
-
-type SignedPowRequest {
-    val powRequest: PowRequest
-    val signature: Signature
 }
 
 

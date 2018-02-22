@@ -1,0 +1,13 @@
+model com.github.itora.pow
+
+import java:com.github.itora.util#ByteArray
+
+type Pow {
+    val value: ByteArray
+}
+
+type Powed[T] {
+    val element: T
+    val pow: Pow
+}
+

@@ -1,0 +1,17 @@
+model com.github.itora.pocket
+
+import java:com.github.itora.util#ByteArray
+
+type Pocket[T] = FatPocket[T] | SlimPocket[T]
+
+type FatPocket[T] {
+    val element: T
+    val inner: Pocket[T]
+    val payload: ByteArray
+}
+
+type SlimPocket[T] {
+    val element: T
+    val payload: ByteArray
+}
+

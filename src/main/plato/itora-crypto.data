@@ -19,3 +19,7 @@ type AsymmetricKey {
 	val privateKey: PrivateKey
 }
 
+type Signed[T] {
+    val element: T
+    val signature: Signature
+}

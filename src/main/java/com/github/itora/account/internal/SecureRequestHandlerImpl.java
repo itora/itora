@@ -1,7 +1,13 @@
 package com.github.itora.account.internal;
 
+import java.util.function.Consumer;
+
+import com.github.itora.account.Account;
 import com.github.itora.account.RequestHandler;
 import com.github.itora.account.SecureRequestHandler;
+import com.github.itora.crypto.Cryptos;
+import com.github.itora.request.Request;
+import com.github.itora.request.Requests;
 import com.github.itora.request.SignedPowRequest;
 
 public final class SecureRequestHandlerImpl implements SecureRequestHandler {
@@ -13,8 +19,9 @@ public final class SecureRequestHandlerImpl implements SecureRequestHandler {
     }
 
     @Override
-    public void accept(SignedPowRequest signedRequest) {
-        requestHandler.accept(signedRequest.powRequest().request());
+    public void accept(SignedPowRequest signedRequest, Consumer<Request> withValidRequest) {
+        Account emitter = Requests.emitter(signedRequest.powRequest.request);
+        Cryptos.verify(signedRequest.signature, buffer, emitter.key);
     }
 
 }
