@@ -3,8 +3,7 @@ package com.github.itora.util;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.assertj.core.util.Lists;
-
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
