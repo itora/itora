@@ -1,156 +1,56 @@
 package com.github.itora.pocket;
 
 import com.github.itora.util.ByteArray;
+import com.github.itora.pow.Powed;
+import com.github.itora.crypto.Signed;
 
-public final class FatPocket<T> extends Pocket<T> {
+public abstract class FatPocket<T> extends Pocket<T> {
 
-    public final T element;
-
-    public final Pocket<T> inner;
-
-    public final ByteArray payload;
-
-    public FatPocket(T element, Pocket<T> inner, ByteArray payload) {
-        this.element = element;
-        this.inner = inner;
-        this.payload = payload;
+    FatPocket() {
     }
 
     public interface Factory {
 
-        public static <T> FatPocket<T> fatPocket(T element, Pocket<T> inner, ByteArray payload) {
-            return new FatPocket<>(element, inner, payload);
+        public static <T> SignedPocket<T> signedPocket(Signed<T> signed, ByteArray payload, Pocket<T> inner) {
+            return new SignedPocket<>(signed, payload, inner);
         }
+
+        public static <T> PowedPocket<T> powedPocket(Powed<T> powed, ByteArray payload, Pocket<T> inner) {
+            return new PowedPocket<>(powed, payload, inner);
+        }
+    }
+
+    public static <T, R> R visit(FatPocket<T> fatPocket, FatPocket.Visitor<T, R> visitor) {
+        return fatPocket.visit(visitor);
+    }
+
+    abstract <R> R visit(FatPocket.Visitor<T, R> visitor);
+
+    @Override
+    final <R> R visit(Pocket.Visitor<T, R> visitor) {
+        return visit((FatPocket.Visitor<T, R>) visitor);
     }
 
     @Override
-    final <R> R visit(Pocket.Visitor<R> visitor) {
-        return visitor.visitFatPocket(this);
-    }
+    public abstract ByteArray payload();
 
     @Override
-    public final T element() {
-        return element;
-    }
+    public abstract FatPocket<T> withPayload(ByteArray payload);
+
+    public abstract Pocket<T> inner();
+
+    public abstract FatPocket<T> withInner(Pocket<T> inner);
 
     @Override
-    public final FatPocket<T> withElement(T element) {
-        return new FatPocket<>(element, inner, payload);
-    }
-
-    public final Pocket<T> inner() {
-        return inner;
-    }
-
-    public final FatPocket<T> withInner(Pocket<T> inner) {
-        return new FatPocket<>(element, inner, payload);
-    }
+    public abstract boolean equals(Object o);
 
     @Override
-    public final ByteArray payload() {
-        return payload;
-    }
+    public abstract int hashCode();
 
-    @Override
-    public final FatPocket<T> withPayload(ByteArray payload) {
-        return new FatPocket<>(element, inner, payload);
-    }
+    public interface Visitor<T, R> {
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
-    }
+        R visitSignedPocket(SignedPocket<T> signedPocket);
 
-    public final Builder<T> toBuilder() {
-        return FatPocket.<T>builder().element(element).inner(inner).payload(payload);
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null) {
-            return false;
-        }
-        if (getClass() != o.getClass()) {
-            return false;
-        }
-        FatPocket<?> that = (FatPocket<?>) o;
-        return java.util.Objects.equals(this.element, that.element) && java.util.Objects.equals(this.inner, that.inner) && java.util.Objects.equals(this.payload, that.payload);
-    }
-
-    @Override
-    public final int hashCode() {
-        return java.util.Objects.hash(element, inner, payload);
-    }
-
-    @Override
-    public final String toString() {
-        return "FatPocket{element = " + this.element + ", inner = " + this.inner + ", payload = " + this.payload + "}";
-    }
-
-    public static final class Builder<T> {
-
-        public T element;
-
-        public Pocket<T> inner;
-
-        public ByteArray payload;
-
-        public final T element() {
-            return element;
-        }
-
-        public final Builder<T> element(T element) {
-            this.element = element;
-            return this;
-        }
-
-        public final Pocket<T> inner() {
-            return inner;
-        }
-
-        public final Builder<T> inner(Pocket<T> inner) {
-            this.inner = inner;
-            return this;
-        }
-
-        public final ByteArray payload() {
-            return payload;
-        }
-
-        public final Builder<T> payload(ByteArray payload) {
-            this.payload = payload;
-            return this;
-        }
-
-        public final FatPocket<T> build() {
-            return new FatPocket<>(element, inner, payload);
-        }
-
-        @Override
-        public final boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null) {
-                return false;
-            }
-            if (getClass() != o.getClass()) {
-                return false;
-            }
-            FatPocket.Builder<?> that = (FatPocket.Builder<?>) o;
-            return java.util.Objects.equals(this.element, that.element) && java.util.Objects.equals(this.inner, that.inner) && java.util.Objects.equals(this.payload, that.payload);
-        }
-
-        @Override
-        public final int hashCode() {
-            return java.util.Objects.hash(element, inner, payload);
-        }
-
-        @Override
-        public final String toString() {
-            return "FatPocket.Builder{element = " + this.element + ", inner = " + this.inner + ", payload = " + this.payload + "}";
-        }
+        R visitPowedPocket(PowedPocket<T> powedPocket);
     }
 }

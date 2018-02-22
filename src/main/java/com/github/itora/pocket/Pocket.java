@@ -1,6 +1,8 @@
 package com.github.itora.pocket;
 
 import com.github.itora.util.ByteArray;
+import com.github.itora.pow.Powed;
+import com.github.itora.crypto.Signed;
 
 public abstract class Pocket<T> {
 
@@ -9,8 +11,12 @@ public abstract class Pocket<T> {
 
     public interface Factory {
 
-        public static <T> FatPocket<T> fatPocket(T element, Pocket<T> inner, ByteArray payload) {
-            return new FatPocket<>(element, inner, payload);
+        public static <T> SignedPocket<T> signedPocket(Signed<T> signed, ByteArray payload, Pocket<T> inner) {
+            return new SignedPocket<>(signed, payload, inner);
+        }
+
+        public static <T> PowedPocket<T> powedPocket(Powed<T> powed, ByteArray payload, Pocket<T> inner) {
+            return new PowedPocket<>(powed, payload, inner);
         }
 
         public static <T> SlimPocket<T> slimPocket(T element, ByteArray payload) {
@@ -18,15 +24,11 @@ public abstract class Pocket<T> {
         }
     }
 
-    public static <R> R visit(Pocket<T> pocket, Pocket.Visitor<R> visitor) {
+    public static <T, R> R visit(Pocket<T> pocket, Pocket.Visitor<T, R> visitor) {
         return pocket.visit(visitor);
     }
 
-    abstract <R> R visit(Pocket.Visitor<R> visitor);
-
-    public abstract T element();
-
-    public abstract Pocket<T> withElement(T element);
+    abstract <R> R visit(Pocket.Visitor<T, R> visitor);
 
     public abstract ByteArray payload();
 
@@ -38,9 +40,11 @@ public abstract class Pocket<T> {
     @Override
     public abstract int hashCode();
 
-    public interface Visitor<R> {
+    public interface Visitor<T, R> extends FatPocket.Visitor<T, R> {
 
-        R visitFatPocket(FatPocket<T> fatPocket);
+        R visitSignedPocket(SignedPocket<T> signedPocket);
+
+        R visitPowedPocket(PowedPocket<T> powedPocket);
 
         R visitSlimPocket(SlimPocket<T> slimPocket);
     }

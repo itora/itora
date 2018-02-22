@@ -21,16 +21,14 @@ public final class SlimPocket<T> extends Pocket<T> {
     }
 
     @Override
-    final <R> R visit(Pocket.Visitor<R> visitor) {
+    final <R> R visit(Pocket.Visitor<T, R> visitor) {
         return visitor.visitSlimPocket(this);
     }
 
-    @Override
     public final T element() {
         return element;
     }
 
-    @Override
     public final SlimPocket<T> withElement(T element) {
         return new SlimPocket<>(element, payload);
     }

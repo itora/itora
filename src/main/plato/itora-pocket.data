@@ -1,17 +1,25 @@
 model com.github.itora.pocket
 
 import java:com.github.itora.util#ByteArray
+import java:com.github.itora.crypto#Signed
+import java:com.github.itora.pow#Powed
 
 type Pocket[T] = FatPocket[T] | SlimPocket[T]
+type FatPocket[T] = SignedPocket[T] | PowedPocket[T] 
 
-type FatPocket[T] {
-    val element: T
-    val inner: Pocket[T]
+type SignedPocket[T] {
+    val signed: Signed[T]
     val payload: ByteArray
+    val inner: Pocket[T]
+}
+
+type PowedPocket[T] {
+    val powed: Powed[T]
+    val payload: ByteArray
+    val inner: Pocket[T]
 }
 
 type SlimPocket[T] {
     val element: T
     val payload: ByteArray
 }
-
