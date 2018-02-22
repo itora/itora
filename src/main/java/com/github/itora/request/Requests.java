@@ -10,6 +10,18 @@ import com.github.itora.pow.Powed;
 public final class Requests {
     private Requests() {
     }
+    
+    private final static Request.Visitor<Account> EMITTER_VISITOR = new Request.Visitor<Account>() {
+        public Account visitOpenRequest(OpenRequest openRequest) {
+            return openRequest.account;
+        }
+        public Account visitSendRequest(SendRequest sendRequest) {
+            return sendRequest.previous.account;
+        }
+        public Account visitReceiveRequest(ReceiveRequest receiveRequest) {
+            return receiveRequest.previous.account;
+        }
+    };
 
     public static Signed<Powed<Request>> sign(Powed<Request> powRequest, PrivateKey privateKey) {
         return Signed.Factory.signed(powRequest, Cryptos.sign(new RegularRequestSerializer().serialize(powRequest.element), privateKey));
@@ -20,22 +32,6 @@ public final class Requests {
     }
     
     public static Account emitter(Request request) {
-        return Request.visit(request, new Request.Visitor<Account>() {
-
-            @Override
-            public Account visitOpenRequest(OpenRequest openRequest) {
-                return openRequest.account;
-            }
-
-            @Override
-            public Account visitSendRequest(SendRequest sendRequest) {
-                return sendRequest.previous.account;
-            }
-
-            @Override
-            public Account visitReceiveRequest(ReceiveRequest receiveRequest) {
-                return receiveRequest.previous.account;
-            }
-        });
+        return Request.visit(request, EMITTER_VISITOR);
     }
 }
