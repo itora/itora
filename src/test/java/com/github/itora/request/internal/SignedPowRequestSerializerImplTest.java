@@ -58,7 +58,6 @@ public class SignedPowRequestSerializerImplTest {
         shouldSerializeDeserialize(open, keyEN);
         shouldSerializeDeserialize(send, keyEN);
         shouldSerializeDeserialize(receive, keyS);
-
     }
 
 }

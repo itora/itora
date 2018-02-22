@@ -22,22 +22,58 @@ public final class ByteArrayConsumer {
 			current = ByteBuffer.wrap(byteArray.bytes[next]);
 			next++;
 		}
+		if (size < 0L) {
+			if (current.position() > 0) {
+				throw new IllegalArgumentException("Could not partially consume an internal byte array");
+			}
+		}
 		if (current.remaining() < size) {
 			throw new IllegalArgumentException("Could not consume over two internal byte arrays");
 		}
 		return current;
 	}
 	
+	private void uncheck() {
+		if (current == null) {
+			return;
+		}
+		if (!current.hasRemaining()) {
+			current = null;
+		}
+	}
+	
 	public byte consumeByte() {
-		return check(1).get();
+		try {
+			return check(1).get();
+		} finally {
+			uncheck();
+		}
 	}
 
 	public int consumeInt() {
-		return check(Ints.BYTES).getInt();
+		try {
+			return check(Ints.BYTES).getInt();
+		} finally {
+			uncheck();
+		}
 	}
 
 	public long consumeLong() {
-		return check(Longs.BYTES).getLong();
+		try {
+			return check(Longs.BYTES).getLong();
+		} finally {
+			uncheck();
+		}
+	}
+	
+	public byte[] consumeBytes() {
+		try {
+			ByteBuffer b = check(-1);
+			b.position(b.position() + b.remaining());
+			return b.array();
+		} finally {
+			uncheck();
+		}
 	}
 	
 	public interface Callback {
@@ -45,8 +81,11 @@ public final class ByteArrayConsumer {
 	}
 	
 	public void consume(Callback consumer, long length) {
+		if (length < 0L) {
+			throw new IllegalArgumentException();
+		}
 		while (true) {
-			if (length == 0L) { // Does not break if length == -1L initially
+			if (length == 0L) {
 				break;
 			}
 			if (current == null) {
@@ -61,13 +100,23 @@ public final class ByteArrayConsumer {
 			consumer.consume(current.array(), current.position(), l);
 			length -= l;
 			current.position(current.position() + l);
-			if (current.position() == current.limit()) {
-				current = null;
-			}
+			uncheck();
 		}
 	}
 	
 	public void consume(Callback consumer) {
-		consume(consumer, -1L);
+		while (true) {
+			if (current == null) {
+				if (next == byteArray.bytes.length) {
+					break;
+				}
+				current = ByteBuffer.wrap(byteArray.bytes[next]);
+				next++;
+			}
+
+			consumer.consume(current.array(), current.position(), current.remaining());
+			current.position(current.position() + current.remaining());
+			uncheck();
+		}
 	}
 }

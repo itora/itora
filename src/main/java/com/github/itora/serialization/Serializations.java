@@ -11,13 +11,6 @@ public final class Serializations {
 	}
 	
 	public static ByteArray build(ToProducingByteArray... to) {
-		/*
-		long totalSize = 0L;
-		for (ToProducingByteArray t : to) {
-			totalSize += t.size();
-		}
-		ProducingByteArray buffer = new ProducingByteArray(totalSize);
-		*/
 		ByteArrayProducer buffer = new ByteArrayProducer();
 		for (ToProducingByteArray t : to) {
 			t.appendTo(buffer);
@@ -25,6 +18,24 @@ public final class Serializations {
 		return buffer.finish();
 	}
 	
+	private static final class IntTo implements ToProducingByteArray {
+		private final int value;
+		public IntTo(int value) {
+			this.value = value;
+		}
+		@Override
+		public void appendTo(ByteArrayProducer buffer) {
+			buffer.produceInt(value);
+		}
+	}
+	
+	public static ToProducingByteArray to(int value) {
+		return new IntTo(value);
+	}
+	public static int intFrom(ByteArrayConsumer buffer) {
+		return buffer.consumeInt();
+	}
+
 	private static final class LongTo implements ToProducingByteArray {
 		private final long value;
 		public LongTo(long value) {
@@ -69,8 +80,9 @@ public final class Serializations {
 		}
 		@Override
 		public void appendTo(ByteArrayProducer buffer) {
-			for (int i = 0; i < value.bytes.length; i++) {
-				buffer.produceBytes(value.bytes[i]);
+			buffer.produceInt(value.bytes.length);
+			for (byte[] b : value.bytes) {
+				buffer.produceBytes(b);
 			}
 		}
 	}
@@ -79,14 +91,11 @@ public final class Serializations {
 		return new ByteArrayTo(value);
 	}
 	public static ByteArray byteArrayFrom(ByteArrayConsumer buffer) {
-		ByteArrayProducer p = new ByteArrayProducer();
-		buffer.consume(new ByteArrayConsumer.Callback() {
-			@Override
-			public void consume(byte[] b, int position, int length) {
-				p.produceBytes(b, position, length);
-			}
-		});
-		return p.finish();
+		byte[][] bytes = new byte[buffer.consumeInt()][];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = buffer.consumeBytes();
+		}
+		return new ByteArray(bytes);
 	}
 
 }

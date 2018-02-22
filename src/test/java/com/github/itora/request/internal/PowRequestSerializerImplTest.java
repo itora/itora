@@ -54,7 +54,6 @@ public class PowRequestSerializerImplTest {
 		shouldSerializeDeserialize(open, keyEN);
 		shouldSerializeDeserialize(send, keyEN);
 		shouldSerializeDeserialize(receive, keyS);
-
 	}
 
 }

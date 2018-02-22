@@ -22,7 +22,8 @@ import com.github.itora.pow.Powed;
 import com.github.itora.request.RegularSignedPowRequestSerializer;
 import com.github.itora.request.Request;
 import com.github.itora.request.SignedPowRequestSerializer;
-import com.github.itora.util.ByteArrayProducer;
+import com.github.itora.util.ByteArray;
+import com.google.common.base.Charsets;
 
 public final class UdpServer {
 
@@ -82,7 +83,7 @@ public final class UdpServer {
 			@Override
 			public void received(Address address, ByteBuffer buffer) {
 				LOGGER.trace("Received {} bytes from {}", buffer.remaining(), address);
-				callback.accept(serializer.deserialize(new ByteArrayProducer().produceBytes(buffer.array(), buffer.position(), buffer.remaining()).finish()));
+				callback.accept(serializer.deserialize(from(buffer)));
 			}
 		});
 
@@ -105,6 +106,14 @@ public final class UdpServer {
 		if (connecter == null) {
 			return;
 		}
-		connecter.send(address, ByteBuffer.wrap(serializer.serialize(request).flattened()), new Nop());
+		connecter.send(address, to(serializer.serialize(request)), new Nop());
+	}
+	
+	//TODO This is slow and ugly, of course
+	private static ByteBuffer to(ByteArray a) {
+		return ByteBuffer.wrap(a.representation().getBytes(Charsets.UTF_8));
+	}
+	private static ByteArray from(ByteBuffer a) {
+		return ByteArray.fromRepresentation(new String(a.array(), a.arrayOffset() + a.position(), a.remaining(), Charsets.UTF_8));
 	}
 }

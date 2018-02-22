@@ -49,7 +49,6 @@ public class RequestSerializerImplTest {
         shouldSerializeDeserialize(open);
         shouldSerializeDeserialize(send);
         shouldSerializeDeserialize(receive);
-
     }
 
 }

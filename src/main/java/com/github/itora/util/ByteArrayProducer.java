@@ -4,11 +4,17 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.assertj.core.util.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
 public final class ByteArrayProducer {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ByteArrayProducer.class);
+
+	private static final int MIN_BUFFER_SIZE = 100;
+	
 	private final List<ByteBuffer> bytes = Lists.newArrayList();
 	private ByteBuffer current = null;
 
@@ -20,12 +26,13 @@ public final class ByteArrayProducer {
 		int i = 0;
 		for (ByteBuffer b : bytes) {
 			b.flip();
-			if ((b.position() == 0) && (b.limit() == b.array().length)) {
+			if ((b.position() == 0) && (b.remaining() == b.array().length)) {
 				bb[i] = b.array();
 			} else {
 				bb[i] = new byte[b.remaining()];
 				b.get(bb[i]);
 			}
+			i++;
 		}
 		return new ByteArray(bb);
 	}
@@ -37,7 +44,7 @@ public final class ByteArrayProducer {
 			}
 		}
 		if (current == null) {
-			current = ByteBuffer.allocate(100);
+			current = ByteBuffer.allocate(MIN_BUFFER_SIZE);
 			bytes.add(current);
 		}
 		return current;
@@ -61,8 +68,11 @@ public final class ByteArrayProducer {
 	public ByteArrayProducer produceBytes(byte[] value, int position, int length) {
 		if ((position == 0) && (length == value.length)) {
 			current = null;
-			bytes.add(ByteBuffer.wrap(value));
+			ByteBuffer b = ByteBuffer.wrap(value);
+			b.position(length);
+			bytes.add(b);
 		} else {
+			LOGGER.warn("Costly ByteArray production (position={}, length={})", position, length);
 			check(length).put(value, position, length);
 		}
 		return this;

@@ -5,10 +5,13 @@ import java.util.List;
 
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 public final class ByteArray {
 
-	private static final char SEPARATOR = '\n';
+	private static final char REPRESENTATION_SEPARATOR = '\n';
 	
     public final byte[][] bytes;
     private int cachedHashCode = Undefineds.HASH_CODE;
@@ -21,7 +24,30 @@ public final class ByteArray {
         this.bytes = bytes;
     }
 
-	//TODO Virer cette methode et utiliser ByteArray dans ninio
+	public static ByteArray cat(ByteArray... byteArrays) {
+		int s = 0;
+		for (ByteArray b : byteArrays) {
+			s += b.bytes.length;
+		}
+		byte[][] bytes = new byte[s][];
+		int k = 0;
+		for (int i = 0; i < byteArrays.length; i++) {
+			int l = byteArrays[i].bytes.length;
+			System.arraycopy(byteArrays[i].bytes, 0, bytes, k, l);
+			k += l;
+		}
+		return new ByteArray(bytes);
+	}
+	
+	public long totalLength() {
+		long l = 0L;
+    	for (byte[] b : bytes) {
+    		l += b.length;
+    	}
+    	return l;
+	}
+
+	// Method required to pass a raw byte array to crypto functions
     public byte[] flattened() {
     	if (bytes.length == 0) {
     		return new byte[] {};
@@ -29,11 +55,11 @@ public final class ByteArray {
     	if (bytes.length == 1) {
     		return bytes[0];
     	}
-    	int s = 0;
+    	long s = 0L;
     	for (byte[] b : bytes) {
     		s += b.length;
     	}
-        byte[] bb = new byte[s];
+        byte[] bb = new byte[(int) s];
         int i = 0;
     	for (byte[] b : bytes) {
             System.arraycopy(b, 0, bb, i, b.length);
@@ -44,14 +70,14 @@ public final class ByteArray {
     
     @Override
     public String toString() {
-		StringBuilder b = new StringBuilder();
+    	JsonArray a = new JsonArray();
     	for (int i = 0; i < bytes.length; i++) {
-	    	if (i > 0) {
-	    		b.append(SEPARATOR);
-	    	}
-	    	b.append(BaseEncoding.base64().encode(bytes[i]));
+        	JsonObject o = new JsonObject();
+    		o.add("size", new JsonPrimitive(bytes[i].length));
+    		o.add("data", new JsonPrimitive(BaseEncoding.base64().encode(bytes[i])));
+        	a.add(o);
 		}
-    	return b.toString();
+    	return a.toString();
     }
     
     @Override
@@ -89,8 +115,19 @@ public final class ByteArray {
     	return true;
     }
     
-    public static ByteArray from(String base64) {
-    	List<String> l = Splitter.on(SEPARATOR).splitToList(base64);
+    public String representation() {
+		StringBuilder b = new StringBuilder();
+    	for (int i = 0; i < bytes.length; i++) {
+	    	if (i > 0) {
+	    		b.append(REPRESENTATION_SEPARATOR);
+	    	}
+	    	b.append(BaseEncoding.base64().encode(bytes[i]));
+		}
+    	return b.toString();
+    }
+    
+    public static ByteArray fromRepresentation(String representationAsBase64) {
+    	List<String> l = Splitter.on(REPRESENTATION_SEPARATOR).splitToList(representationAsBase64);
         byte[][] bytes = new byte[l.size()][];
         int i = 0;
         for (String s : l) {
