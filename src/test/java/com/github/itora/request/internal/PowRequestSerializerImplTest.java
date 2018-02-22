@@ -10,15 +10,15 @@ import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
 import com.github.itora.crypto.Cryptos;
+import com.github.itora.pow.Pow;
+import com.github.itora.pow.Powed;
 import com.github.itora.request.OpenRequest;
-import com.github.itora.request.PowRequest;
 import com.github.itora.request.ReceiveRequest;
 import com.github.itora.request.RegularPowRequestSerializer;
 import com.github.itora.request.Request;
 import com.github.itora.request.SendRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxIds;
-import com.github.itora.util.ByteArray;
 
 public class PowRequestSerializerImplTest {
 
@@ -30,9 +30,9 @@ public class PowRequestSerializerImplTest {
 	}
 
 	private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
-		ByteArray pow = Cryptos.random(100);
-		PowRequest pr = PowRequest.Factory.powRequest(request, pow);
-		PowRequest result = requestSerializer.deserialize(requestSerializer.serialize(pr));
+		Pow pow = Pow.Factory.pow(Cryptos.random(100));
+		Powed<Request> pr = Powed.Factory.powed(request, pow);
+		Powed<Request> result = requestSerializer.deserialize(requestSerializer.serialize(pr));
 		Assertions.assertThat(result).isEqualTo(pr);
 	}
 

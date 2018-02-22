@@ -1,7 +1,5 @@
 package com.github.itora.crypto;
 
-import java.nio.ByteBuffer;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -13,8 +11,8 @@ public class CryptosTest {
     public void shouldSignAndVerify() {
     	AsymmetricKey asymmetricKey = Cryptos.generate();
     	ByteArray randomBuffer = Cryptos.random(1000);
-    	Signature signature = Cryptos.sign(ByteBuffer.wrap(randomBuffer.bytes), asymmetricKey.privateKey());
-		Assertions.assertThat(Cryptos.verify(signature, ByteBuffer.wrap(randomBuffer.bytes), asymmetricKey.publicKey())).isTrue();
+    	Signature signature = Cryptos.sign(randomBuffer, asymmetricKey.privateKey());
+		Assertions.assertThat(Cryptos.verify(signature, randomBuffer, asymmetricKey.publicKey())).isTrue();
     }
 
 }

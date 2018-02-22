@@ -1,35 +1,30 @@
 package com.github.itora.request;
 
-import java.nio.ByteBuffer;
-
-import com.github.itora.serialization.ToByteBuffer;
+import com.github.itora.serialization.ToProducingByteArray;
+import com.github.itora.util.ConsumableByteArray;
+import com.github.itora.util.ProducingByteArray;
 
 class RequestKindCodes {
-	static final int OPEN_CODE = 0;
-	static final int SEND_CODE = 1;
-	static final int RECEIVE_CODE = 2;
+	static final byte OPEN_CODE = 0;
+	static final byte SEND_CODE = 1;
+	static final byte RECEIVE_CODE = 2;
 }
 
-enum RequestKind implements ToByteBuffer {
+enum RequestKind implements ToProducingByteArray {
 	OPEN(RequestKindCodes.OPEN_CODE), SEND(RequestKindCodes.SEND_CODE), RECEIVE(RequestKindCodes.RECEIVE_CODE);
 
-	public final int code;
-	private RequestKind(int code) {
+	public final byte code;
+	private RequestKind(byte code) {
 		this.code = code;
 	}
 	
 	@Override
-	public int size() {
-		return 1;
+	public void appendTo(ProducingByteArray buffer) {
+		buffer.produceByte(code);
 	}
 	
-	@Override
-	public void appendTo(ByteBuffer buffer) {
-		buffer.put((byte) (code & 0xFF));
-	}
-	
-	public static RequestKind requestKindFrom(ByteBuffer buffer) {
-		int code = buffer.get() & 0xFF;
+	public static RequestKind requestKindFrom(ConsumableByteArray buffer) {
+		byte code = buffer.consumeByte();
 		switch (code) {
 		case RequestKindCodes.OPEN_CODE: return OPEN;
 		case RequestKindCodes.SEND_CODE: return SEND;

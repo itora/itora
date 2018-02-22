@@ -1,8 +1,8 @@
 package com.github.itora.request;
 
-import java.nio.ByteBuffer;
+import com.github.itora.util.ByteArray;
 
 public interface RequestSerializer {
-	ByteBuffer serialize(Request request);
-	Request deserialize(ByteBuffer buffer);
+	ByteArray serialize(Request request);
+	Request deserialize(ByteArray buffer);
 }
