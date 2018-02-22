@@ -7,6 +7,7 @@ import com.github.itora.account.RequestHandler;
 import com.github.itora.account.SecureRequestHandler;
 import com.github.itora.crypto.Cryptos;
 import com.github.itora.crypto.Signed;
+import com.github.itora.pocket.SignedPocket;
 import com.github.itora.pow.Powed;
 import com.github.itora.request.Request;
 import com.github.itora.request.Requests;
@@ -21,8 +22,13 @@ public final class SecureRequestHandlerImpl implements SecureRequestHandler {
 
     @Override
     public void accept(Signed<Powed<Request>> signedRequest, Consumer<Request> withValidRequest) {
-        Account emitter = Requests.emitter(signedRequest.powRequest.request);
-        Cryptos.verify(signedRequest.signature, buffer, emitter.key);
+//        Account emitter = Requests.emitter(signedRequest.powRequest.request);
+//        Cryptos.verify(signedRequest.signature, buffer, emitter.key);
+    }
+
+    @Override
+    public void accept(SignedPocket<Powed<Request>> signedPocket, Consumer<Request> withValidRequest) {
+        
     }
 
 }

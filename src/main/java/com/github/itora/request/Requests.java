@@ -4,17 +4,19 @@ import com.github.itora.account.Account;
 import com.github.itora.crypto.Cryptos;
 import com.github.itora.crypto.PrivateKey;
 import com.github.itora.crypto.PublicKey;
+import com.github.itora.crypto.Signed;
+import com.github.itora.pow.Powed;
 
 public final class Requests {
     private Requests() {
     }
 
-    public static SignedPowRequest sign(PowRequest powRequest, PrivateKey privateKey) {
-        return SignedPowRequest.Factory.signedPowRequest(powRequest, Cryptos.sign(new RegularRequestSerializer().serialize(powRequest.request()), privateKey));
+    public static Signed<Powed<Request>> sign(Powed<Request> powRequest, PrivateKey privateKey) {
+        return Signed.Factory.signed(powRequest, Cryptos.sign(new RegularRequestSerializer().serialize(powRequest.element), privateKey));
     }
 
-    public static boolean verify(SignedPowRequest request, PublicKey publicKey) {
-        return Cryptos.verify(request.signature(), new RegularRequestSerializer().serialize(request.powRequest().request()), publicKey);
+    public static boolean verify(Signed<Powed<Request>> request, PublicKey publicKey) {
+        return Cryptos.verify(request.signature(), new RegularRequestSerializer().serialize(request.element().element()), publicKey);
     }
     
     public static Account emitter(Request request) {
