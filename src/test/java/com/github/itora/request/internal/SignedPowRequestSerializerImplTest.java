@@ -10,17 +10,17 @@ import com.github.itora.account.Account;
 import com.github.itora.amount.Amount;
 import com.github.itora.crypto.AsymmetricKey;
 import com.github.itora.crypto.Cryptos;
+import com.github.itora.crypto.Signed;
+import com.github.itora.pow.Pow;
+import com.github.itora.pow.Powed;
 import com.github.itora.request.OpenRequest;
-import com.github.itora.request.PowRequest;
 import com.github.itora.request.ReceiveRequest;
 import com.github.itora.request.RegularSignedPowRequestSerializer;
 import com.github.itora.request.Request;
 import com.github.itora.request.Requests;
 import com.github.itora.request.SendRequest;
-import com.github.itora.request.SignedPowRequest;
 import com.github.itora.tx.AccountTxId;
 import com.github.itora.tx.TxIds;
-import com.github.itora.util.ByteArray;
 
 public class SignedPowRequestSerializerImplTest {
 
@@ -32,10 +32,10 @@ public class SignedPowRequestSerializerImplTest {
     }
 
     private void shouldSerializeDeserialize(Request request, AsymmetricKey k) {
-    	ByteArray pow = Cryptos.random(100);
-    	PowRequest pr = PowRequest.Factory.powRequest(request, pow);
-        SignedPowRequest spr = Requests.sign(pr, k.privateKey());
-        SignedPowRequest result = requestSerializer.deserialize(requestSerializer.serialize(spr));
+    	Pow pow = Pow.Factory.pow(Cryptos.random(100));
+    	Powed<Request> pr = Powed.Factory.powed(request, pow);
+        Signed<Powed<Request>> spr = Requests.sign(pr, k.privateKey());
+        Signed<Powed<Request>> result = requestSerializer.deserialize(requestSerializer.serialize(spr));
         Assertions.assertThat(Requests.verify(result, k.publicKey)).isTrue();
         Assertions.assertThat(result).isEqualTo(spr);
     }
