@@ -1,8 +1,8 @@
 package com.github.itora.request;
 
 import com.github.itora.serialization.ToProducingByteArray;
-import com.github.itora.util.ConsumableByteArray;
-import com.github.itora.util.ProducingByteArray;
+import com.github.itora.util.ByteArrayConsumer;
+import com.github.itora.util.ByteArrayProducer;
 
 class RequestKindCodes {
 	static final byte OPEN_CODE = 0;
@@ -19,11 +19,11 @@ enum RequestKind implements ToProducingByteArray {
 	}
 	
 	@Override
-	public void appendTo(ProducingByteArray buffer) {
+	public void appendTo(ByteArrayProducer buffer) {
 		buffer.produceByte(code);
 	}
 	
-	public static RequestKind requestKindFrom(ConsumableByteArray buffer) {
+	public static RequestKind requestKindFrom(ByteArrayConsumer buffer) {
 		byte code = buffer.consumeByte();
 		switch (code) {
 		case RequestKindCodes.OPEN_CODE: return OPEN;

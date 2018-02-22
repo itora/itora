@@ -11,7 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import com.github.itora.util.ByteArray;
-import com.github.itora.util.ConsumableByteArray;
+import com.github.itora.util.ByteArrayConsumer;
 
 public final class Cryptos {
     static {
@@ -40,10 +40,10 @@ public final class Cryptos {
     }
 
     public static ByteArray hash(ByteArray b) {
-    	ConsumableByteArray buffer = new ConsumableByteArray(b);
+    	ByteArrayConsumer buffer = new ByteArrayConsumer(b);
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256", "BC");
-            buffer.consume(new ConsumableByteArray.Consumer() {
+            buffer.consume(new ByteArrayConsumer.Callback() {
 				@Override
 				public void consume(byte[] b, int position, int length) {
 		            digest.update(b, position, length);
@@ -69,7 +69,7 @@ public final class Cryptos {
     }
 
     public static Signature sign(ByteArray b, PrivateKey privateKey) {
-    	ConsumableByteArray buffer = new ConsumableByteArray(b);
+    	ByteArrayConsumer buffer = new ByteArrayConsumer(b);
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
             java.security.PrivateKey k = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKey.value.flattened()));
@@ -77,7 +77,7 @@ public final class Cryptos {
             java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");
             s.initSign(k, RANDOM);
 
-            buffer.consume(new ConsumableByteArray.Consumer() {
+            buffer.consume(new ByteArrayConsumer.Callback() {
 				@Override
 				public void consume(byte[] b, int position, int length) {
 		            try {
@@ -95,7 +95,7 @@ public final class Cryptos {
     }
 
     public static boolean verify(Signature signature, ByteArray b, PublicKey publicKey) {
-    	ConsumableByteArray buffer = new ConsumableByteArray(b);
+    	ByteArrayConsumer buffer = new ByteArrayConsumer(b);
         try {
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 			java.security.PublicKey k = keyFactory.generatePublic(new X509EncodedKeySpec(publicKey.value().flattened()));
@@ -103,7 +103,7 @@ public final class Cryptos {
 			java.security.Signature s = java.security.Signature.getInstance("SHA256withRSA", "BC");
 			s.initVerify(k);
 
-            buffer.consume(new ConsumableByteArray.Consumer() {
+            buffer.consume(new ByteArrayConsumer.Callback() {
 				@Override
 				public void consume(byte[] b, int position, int length) {
 		            try {

@@ -1,7 +1,7 @@
 package com.github.itora.serialization;
 
-import com.github.itora.util.ProducingByteArray;
+import com.github.itora.util.ByteArrayProducer;
 
 public interface ToProducingByteArray {
-	void appendTo(ProducingByteArray buffer);
+	void appendTo(ByteArrayProducer buffer);
 }

@@ -3,8 +3,8 @@ package com.github.itora.serialization;
 import java.time.Instant;
 
 import com.github.itora.util.ByteArray;
-import com.github.itora.util.ConsumableByteArray;
-import com.github.itora.util.ProducingByteArray;
+import com.github.itora.util.ByteArrayConsumer;
+import com.github.itora.util.ByteArrayProducer;
 
 public final class Serializations {
 	private Serializations() {
@@ -18,7 +18,7 @@ public final class Serializations {
 		}
 		ProducingByteArray buffer = new ProducingByteArray(totalSize);
 		*/
-		ProducingByteArray buffer = new ProducingByteArray();
+		ByteArrayProducer buffer = new ByteArrayProducer();
 		for (ToProducingByteArray t : to) {
 			t.appendTo(buffer);
 		}
@@ -31,7 +31,7 @@ public final class Serializations {
 			this.value = value;
 		}
 		@Override
-		public void appendTo(ProducingByteArray buffer) {
+		public void appendTo(ByteArrayProducer buffer) {
 			buffer.produceLong(value);
 		}
 	}
@@ -39,7 +39,7 @@ public final class Serializations {
 	public static ToProducingByteArray to(long value) {
 		return new LongTo(value);
 	}
-	public static long longFrom(ConsumableByteArray buffer) {
+	public static long longFrom(ByteArrayConsumer buffer) {
 		return buffer.consumeLong();
 	}
 
@@ -49,7 +49,7 @@ public final class Serializations {
 			this.value = value;
 		}
 		@Override
-		public void appendTo(ProducingByteArray buffer) {
+		public void appendTo(ByteArrayProducer buffer) {
 			buffer.produceLong(value.getEpochSecond());
 			buffer.produceInt(value.getNano());
 		}
@@ -58,7 +58,7 @@ public final class Serializations {
 	public static ToProducingByteArray to(Instant value) {
 		return new InstantTo(value);
 	}
-	public static Instant instantFrom(ConsumableByteArray buffer) {
+	public static Instant instantFrom(ByteArrayConsumer buffer) {
 		return Instant.ofEpochSecond(buffer.consumeLong(), buffer.consumeInt());
 	}
 
@@ -68,7 +68,7 @@ public final class Serializations {
 			this.value = value;
 		}
 		@Override
-		public void appendTo(ProducingByteArray buffer) {
+		public void appendTo(ByteArrayProducer buffer) {
 			for (int i = 0; i < value.bytes.length; i++) {
 				buffer.produceBytes(value.bytes[i]);
 			}
@@ -78,9 +78,9 @@ public final class Serializations {
 	public static ToProducingByteArray to(ByteArray value) {
 		return new ByteArrayTo(value);
 	}
-	public static ByteArray byteArrayFrom(ConsumableByteArray buffer) {
-		ProducingByteArray p = new ProducingByteArray();
-		buffer.consume(new ConsumableByteArray.Consumer() {
+	public static ByteArray byteArrayFrom(ByteArrayConsumer buffer) {
+		ByteArrayProducer p = new ByteArrayProducer();
+		buffer.consume(new ByteArrayConsumer.Callback() {
 			@Override
 			public void consume(byte[] b, int position, int length) {
 				p.produceBytes(b, position, length);

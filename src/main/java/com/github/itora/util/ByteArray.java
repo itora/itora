@@ -21,16 +21,7 @@ public final class ByteArray {
         this.bytes = bytes;
     }
 
-    public ByteArray(ByteArray left, ByteArray right) {
-        bytes = new byte[left.bytes.length + right.bytes.length][];
-        System.arraycopy(left.bytes, 0, bytes, 0, left.bytes.length);
-        System.arraycopy(right.bytes, 0, bytes, left.bytes.length, right.bytes.length);
-    }
-
-    public ByteArray duplicate() {
-    	return new ByteArray(bytes);
-    }
-    
+	//TODO Virer cette methode et utiliser ByteArray dans ninio
     public byte[] flattened() {
     	if (bytes.length == 0) {
     		return new byte[] {};
